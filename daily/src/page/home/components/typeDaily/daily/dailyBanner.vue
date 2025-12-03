@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 
 import 'highlight.js/styles/github.css'
-import {  getMd,addItem, getMdByType } from "@/services/request";
+import {  updateItemByType,addItemByType, getMdByType } from "@/services/request";
 import { EventBus, Events } from '@/envBus/envBus'
 import ItemViewAndEdit from '@/page/home/components/typeDaily/daily/ItemViewAndEdit.vue';
 import {
@@ -26,7 +26,7 @@ const selectedContentNameId = ref<number>(0)
 
 // 获取远程服务器上的md文档
 async function fetchContent() {
-  const json = await getMdByType({ contentNameId: selectedContentNameId.value ?? 0, type: selectedTypeId.value ?? 0 });
+  const json = await getMdByType({ docsId: selectedContentNameId.value ?? 0, type: selectedTypeId.value ?? 0 });
   const list = Array.isArray(json) ? json : json.data;
   if (!Array.isArray(list)) throw new Error('返回不是数组或 data 数组')
 

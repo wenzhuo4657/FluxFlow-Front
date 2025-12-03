@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { EventBus, Events } from '@/envBus/envBus'
 import { getTypesWithItems } from '@/services/request'
 import type { ContentNameDto } from '@/type/ContentNameDto'
@@ -10,11 +10,19 @@ const STORAGE_CN_ID = 'view.contentNameId'
 
 const items = ref<ContentNameDto[]>([])
 const label = ref<string>('选择内容')
-const currentTypeId = ref<number | null>(null)
+const currentTypeId = ref<string | null>(null)
 
-async function loadByTypeId(typeId: number) {
+async function loadByTypeId(typeId: string) {
+  // 验证 typeId 是否有效
+  if (!typeId || typeId === 'null' || typeId === 'undefined') {
+    console.log('Invalid typeId, skipping API call:', typeId)
+    return
+  }
+
+  console.log('Loading content for typeId:', typeId)
+
   try {
-    const json = await getTypesWithItems(typeId)
+    const json = await getTypesWithItems({id: typeId})
     const list = Array.isArray(json) ? json : json?.data
     if (Array.isArray(list)) {
       items.value = list as ContentNameDto[]
@@ -42,10 +50,18 @@ async function loadByTypeId(typeId: number) {
 
 function onTypeChanged(payload: { id: number; key?: string; name?: string } | number) {
   const typeId = typeof payload === 'number' ? payload : payload?.id
-  if (typeof typeId === 'number' && typeId >= 0) {
-    currentTypeId.value = typeId
-    void loadByTypeId(typeId)
+
+  // 验证 typeId 是否有效
+  if (!typeId && typeId !== 0) {
+    console.log('Invalid typeId in onTypeChanged:', typeId)
+    return
   }
+
+  const typeIdStr = String(typeId)
+  console.log('Type changed, new typeId:', typeIdStr)
+
+  // 只需要修改 currentTypeId，watch 会自动调用 loadByTypeId
+  currentTypeId.value = typeIdStr
 }
 
 function onCommand(cmd: number | string) {
@@ -61,16 +77,30 @@ function onCommand(cmd: number | string) {
   }
 }
 
+// 监听 currentTypeId 变化，自动加载内容
+watch(currentTypeId, (newTypeId, oldTypeId) => {
+  if (newTypeId && newTypeId !== oldTypeId) {
+    console.log('currentTypeId changed from', oldTypeId, 'to', newTypeId)
+    loadByTypeId(newTypeId)
+  }
+})
+
 onMounted(() => {
   EventBus.$on(Events.Button_type, onTypeChanged)
   // 首次进入时尝试根据已保存的类型立即加载
   try {
-    const savedType = Number(sessionStorage.getItem(STORAGE_TYPE_ID))
-    if (!Number.isNaN(savedType)) {
+    const savedType = sessionStorage.getItem(STORAGE_TYPE_ID)
+
+    if (savedType && savedType !== 'null' && savedType !== 'undefined') {
+      console.log('Restoring saved typeId:', savedType)
       currentTypeId.value = savedType
-      void loadByTypeId(savedType)
+      // 注意：这里不需要手动调用 loadByTypeId，因为 watch 会自动触发
+    } else {
+      console.log('No valid saved typeId found')
     }
-  } catch {}
+  } catch (e) {
+    console.error('Failed to restore saved type:', e)
+  }
 })
 onBeforeUnmount(() => {
   EventBus.$off(Events.Button_type, onTypeChanged)

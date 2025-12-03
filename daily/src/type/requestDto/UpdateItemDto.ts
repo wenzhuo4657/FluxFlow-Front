@@ -1,7 +1,6 @@
 
 
-    export interface UpdateItemDto{
-        id:number,
-        type:number,
+    export interface UpdateItemRequest{
+        index:string,
         content:string
     }

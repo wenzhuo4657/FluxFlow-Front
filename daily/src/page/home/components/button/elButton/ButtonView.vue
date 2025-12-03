@@ -4,12 +4,23 @@ import { EventBus, Events } from '@/envBus/envBus'
 import { getAllTypes } from '@/services/request'
 import type { TypeDto } from '@/type/TypeDto'
 import { ArrowDown } from '@element-plus/icons-vue'
+import { useAuthStore } from '@/storage/auth'
 
 const STORAGE_TYPE_ID = 'view.typeId'
 
 const types = ref<TypeDto[]>([])
+const authStore = useAuthStore()
 
 async function fetchTypes() {
+  // 确保用户已认证
+  const token = authStore.token
+  if (!token || (typeof token === 'object' && 'value' in token && !token.value)) {
+    console.log('User not authenticated, skipping type fetch')
+    return
+  }
+
+  console.log('Fetching types with token:', token.value || token)
+
   try {
     const json = await getAllTypes()
     const list = Array.isArray(json) ? json : json?.data
@@ -43,7 +54,16 @@ function emitViewByType(t: TypeDto) {
   const key = viewMap[name] || 'dailyBase'
   EventBus.$emit(Events.Button_view, key)
   EventBus.$emit(Events.Button_type, { id: t.id, key, name: t.name })
-  try { sessionStorage.setItem(STORAGE_TYPE_ID, String(t.id)) } catch {}
+
+  // 确保保存有效的 typeId
+  if (t.id !== null && t.id !== undefined) {
+    try {
+      sessionStorage.setItem(STORAGE_TYPE_ID, String(t.id))
+      console.log('Saved typeId:', t.id)
+    } catch (e) {
+      console.error('Failed to save typeId:', e)
+    }
+  }
 }
 
 function onCommand(cmd: number | string) {

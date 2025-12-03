@@ -1,90 +1,156 @@
 import { getHttp } from "@/lib/http";
-import { QueryItemDto } from "@/type/requestDto/QueryItemDto";
-import { UpdateItemDto } from "@/type/requestDto/UpdateItemDto";
-import { InsertItemDto } from "@/type/requestDto/InsertItemDto";
-import { UpdateCheckListDto } from "@/type/requestDto/UpdateCheckListDto";
-import { ref } from "vue";
+import { GetItemsRequest } from "@/type/requestDto/GetItemsRequest";
+import { InsertItemRequest } from "@/type/requestDto/InsertItemRequest";
+import { UpdateItemRequest } from "@/type/requestDto/UpdateItemDto";
+import { UpdateCheckListRequest } from "@/type/requestDto/UpdateCheckListRequest";
+import { GetContentIdsByTypesRequest } from "@/type/requestDto/GetContentIdsByTypesRequest";
 
+// ==================== API响应类型定义 ====================
 
+/**
+ * 基础API响应接口
+ */
+interface BaseApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  message?: string;
+}
 
+/**
+ * 成功响应类型
+ */
+interface SuccessResponse<T = any> extends BaseApiResponse<T> {
+  success: true;
+  data: T;
+}
 
+/**
+ * 错误响应类型
+ */
+interface ErrorResponse extends BaseApiResponse {
+  success: false;
+  message: string;
+}
 
+/**
+ * 获取条目响应数据类型
+ * 根据API文档，index为String类型以避免精度损失
+ */
+interface ItemData {
+  index: string;
+  content: string;
+  title: string;
+  expand: string;
+}
 
+/**
+ * 类型数据
+ * 根据API文档，id为String类型以避免精度损失
+ */
+interface TypeData {
+  id: string;
+  name: string;
+}
 
+/**
+ * 文档数据
+ * 根据API文档，id为String类型以避免精度损失
+ */
+interface ContentData {
+  id: string;
+  name: string;
+}
 
+// ==================== API方法实现 ====================
 
-
-export async  function getMdByType(data:QueryItemDto){
-  const http=getHttp()
-  const res=await http.post("/api/item/get",data,{
+/**
+ * 查询文档条目
+ * @param data 请求参数
+ * @returns 条目数组（严格检查响应状态）
+ */
+export async function getMdByType(data: GetItemsRequest): Promise<ItemData[]> {
+  const http = getHttp();
+  const res = await http.post<SuccessResponse<ItemData[]>>("/api/item/get", data, {
     headers: {
-    Accept: "application/json",
-    },
-     responseType: "json"
-  })
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    }
+  });
 
- 
-  return res.data;
-}
+  // 严格控制接口返回值：检查success字段
+  if (!res.data.success) {
+    throw new Error(res.data.message || "获取条目失败");
+  }
 
-export async function addItem() {
-  const http=getHttp()
-  const payload: InsertItemDto = { contentNameId: 0, type: 0 };
-  return addItemByType(payload);
-}
-
-export async function getMd() {
-  const http=getHttp()
-  return getMdByType({ contentNameId: 0, type: 0 });
-}
-
-export async function  updateItemByType(data:UpdateItemDto) {
-
-  const http=getHttp()
-
-  const res=await http.post("/api/item/update",data,{
-    
-    responseType: "text"
-  })
-  return !!res.data;
-  
+  // 严格返回数据：确保返回数组类型
+  return Array.isArray(res.data.data) ? res.data.data : [];
 }
 
 
+/**
+ * 新增日记条目
+ * @param data 请求参数
+ * @returns 操作结果（严格检查响应状态）
+ */
+export async function addItemByType(data: InsertItemRequest): Promise<boolean> {
+  const http = getHttp();
+  const res = await http.post<BaseApiResponse>("/api/item/insert", data, {
+    headers: {
+      "Content-Type": "application/json",
+    }
+  });
 
+  // 严格控制接口返回值：检查success字段
+  if (!res.data.success) {
+    throw new Error(res.data.message || "新增条目失败");
+  }
 
+  return true;
+}
 
+/**
+ * 更新日记条目
+ * @param data 请求参数
+ * @returns 操作结果（严格检查响应状态）
+ */
+export async function updateItemByType(data: UpdateItemRequest): Promise<boolean> {
+  const http = getHttp();
+  const res = await http.post<BaseApiResponse>("/api/item/update", data, {
+    headers: {
+      "Content-Type": "application/json",
+    }
+  });
 
-export async function addItemByType(data:InsertItemDto) {
-  const http=getHttp()
-  const res=await http.post("/api/item/insert",data,{
+  // 严格控制接口返回值：检查success字段
+  if (!res.data.success) {
+    throw new Error(res.data.message || "更新条目失败");
+  }
 
-    responseType: "text"
-  })
-  return !!res.data;
-  
+  return true;
 }
 
 
 
 
+// ==================== 文件上传下载接口（根据需要使用） ====================
 
-
-export async function  DownLoadFile(){
-  const http=getHttp()
-  const res=await http.get("api/DownLoadFile",{
+/**
+ * 下载文件
+ * 注意：这些接口在API文档中未定义，如需使用请先添加到API文档中
+ */
+export async function DownLoadFile() {
+  const http = getHttp();
+  const res = await http.get("/api/DownLoadFile", {
     responseType: 'blob',
-    headers :{
+    headers: {
       'Content-Type': 'multipart/form-data'
     }
-  })
+  });
 
-  try{
-    const blob = new Blob([res.data]); // 可根据后端设置的 Content-Type 指定类型
-    const cd = res.headers['content-disposition'];
-    const filename =  'download.db';
+  try {
+    const blob = new Blob([res.data]);
+    const filename = 'download.db';
 
-    // 生成临时链接并触发下载
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.style.display = 'none';
@@ -94,70 +160,119 @@ export async function  DownLoadFile(){
     a.click();
     a.remove();
     window.URL.revokeObjectURL(url);
-  }catch(err){
+  } catch (err) {
     alert('下载失败，请稍后重试');
   }
-} 
-
-
-export async function  upload(data) {
-  const http=getHttp()
-  const progress = ref(0);
-  const res=await http.post("api/upload",data,  
-      {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      onUploadProgress(evt) {
-        if (evt.total) {
-          progress.value = Math.round((evt.loaded / evt.total) * 100);
-        }
-      }
-})
-   return !!res.data ;
-  
 }
 
-
-
-
-
-
-export async function updateCheckListTitle(data:UpdateCheckListDto){
-  const http=getHttp()
-    const res=await http.post("/api/item/field/checklist/title",data,{
-    responseType: "text"
-  })
-  return !!res.data;
-
-
-}
-
-
-export async function updateCheckListStatus(data:number){
-  const http=getHttp()
-    let url="/api/item/field/checklist/finish"
-    url+="?id="+data
-    const res=await http.post(url,{
-
-    responseType: "text"
-     })
-  return !!res.data;
-
-
-}
-
-export async function getAllTypes() {
+/**
+ * 上传文件
+ * 注意：这些接口在API文档中未定义，如需使用请先添加到API文档中
+ */
+export async function upload(data: FormData): Promise<boolean> {
   const http = getHttp();
-  const url = "/api/types/getAllTypes";
-  const res = await http.get(url);
-  return res.data;
+  const res = await http.post("/api/upload", data, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+  return !!res.data;
 }
 
-export async function getTypesWithItems(data:number) {
-    const http=getHttp()
-    let url="/api/types/getContentIdsByTypes"
-    url+="?id="+data
-    const res=await http.get(url)
-    return res.data;
+/**
+ * 更新检查清单标题
+ * @param data 请求参数
+ * @returns 操作结果（严格检查响应状态）
+ */
+export async function updateCheckListTitle(data: UpdateCheckListRequest): Promise<boolean> {
+  const http = getHttp();
+  const res = await http.post<BaseApiResponse>("/api/item/field/checklist/title", data, {
+    headers: {
+      "Content-Type": "application/json",
+    }
+  });
 
-  
+  // 严格控制接口返回值：检查success字段
+  if (!res.data.success) {
+    throw new Error(res.data.message || "更新检查清单标题失败");
+  }
+
+  return true;
+}
+
+/**
+ * 完成检查清单
+ * @param id 检查清单项ID（String类型，避免精度损失）
+ * @returns 操作结果（严格检查响应状态）
+ */
+export async function updateCheckListStatus(id: string): Promise<boolean> {
+  const http = getHttp();
+  const res = await http.post<BaseApiResponse>("/api/item/field/checklist/finish", { id }, {
+    headers: {
+      "Content-Type": "application/json",
+    }
+  });
+
+  // 严格控制接口返回值：检查success字段
+  if (!res.data.success) {
+    throw new Error(res.data.message || "完成检查清单失败");
+  }
+
+  return true;
+}
+
+/**
+ * 获取所有类型列表
+ * @returns 类型数组（严格检查响应状态，API直接返回数组，不在BaseApiResponse包装中）
+ */
+export async function getAllTypes(): Promise<TypeData[]> {
+  const http = getHttp();
+  const res = await http.get<TypeData[]>("/api/types/getAllTypes", {
+    headers: {
+      Accept: "application/json",
+    },
+    responseType: "json"
+  });
+
+  // 严格控制接口返回值：确保返回数组类型
+  return Array.isArray(res.data) ? res.data : [];
+}
+
+/**
+ * 根据类型获取文档列表
+ * @param data 请求参数（API直接返回数组，不在BaseApiResponse包装中）
+ * @returns 文档数组（严格检查响应状态）
+ */
+export async function getTypesWithItems(data: GetContentIdsByTypesRequest): Promise<ContentData[]> {
+  const http = getHttp();
+  const res = await http.post<ContentData[]>("/api/types/getContentIdsByTypes", data, {
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    responseType: "json"
+  });
+
+  // 严格控制接口返回值：确保返回数组类型
+  return Array.isArray(res.data) ? res.data : [];
+}
+
+/**
+ * 用户登出
+ * @returns 登出结果（严格检查响应状态）
+ */
+export async function logout(): Promise<boolean> {
+  const http = getHttp();
+  const res = await http.post("/api/oauth/logout", {}, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    responseType: "json"
+  });
+
+  // 严格控制接口返回值：检查登出结果
+  // API文档显示直接返回 true/false
+  if (res.data !== true) {
+    throw new Error("登出失败");
+  }
+
+  return true;
 }

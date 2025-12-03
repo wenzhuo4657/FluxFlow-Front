@@ -11,6 +11,7 @@ const routes = [
     name: 'Root',
     redirect: () => {
       const token = localStorage.getItem('token')
+      console.log('Root redirect check:', { token: token ? 'exists' : 'none' })
       return token ? '/home' : '/login'
     }
   },
@@ -43,8 +44,19 @@ const router = createRouter({
 
 router.beforeEach((to, from) => {
   const auth = useAuthStore();
-  const authed = auth.isAuthenticated?.value ?? !!auth.token;
+  // 检查 token（支持 ref）
+  const token = auth.token;
+  const tokenValue = (token && typeof token === 'object' && 'value' in token) ? token.value : token;
+  const authed = !!tokenValue;
+
+  console.log('Route guard check:', {
+    to: to.name,
+    hasToken: authed,
+    token: tokenValue
+  });
+
   if (to.meta.requiresAuth && !authed) {
+    console.log('Authentication required, redirecting to login');
     return { name: 'Login' };
   }
 });
