@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+import { LocalStorage } from '@/constants/storage';
 
 let service: AxiosInstance | null = null;
 let userStore: any = null;
@@ -34,7 +35,7 @@ export function initHttp(store: any): AxiosInstance {
 
       // 方式 2：从 localStorage 直接获取（备用方案）
       if (!token) {
-        token = localStorage.getItem('token') || '';
+        token = localStorage.getItem(LocalStorage.TOKEN) || '';
       }
 
       // 调试日志

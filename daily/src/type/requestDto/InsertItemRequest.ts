@@ -1,7 +1,5 @@
 
-
-
-    export interface InsertItemRequest{
+export interface InsertItemRequest{
         docsId:string,
-        type:number,
+        type:string,
     }

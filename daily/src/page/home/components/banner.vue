@@ -2,20 +2,16 @@
 import dailyBanner from '@/page/home/components/typeDaily/daily/dailyBanner.vue'
 import checklistBanner from '@/page/home/components/typeDaily/checklist/checklistBanner.vue';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { EventBus, Events } from '@/envBus/envBus';
+import { EventBus, Events } from '@/envBus/envBus.ts';
+import { SessionStorage } from '@/constants/storage';
 
 import { useI18n } from 'vue-i18n'
-
-const { t } = useI18n()
-
-//  TODO 索引名称需要前后端约定
-const STORAGE_KEY = 'view.current'
 
 
 // vue组件生命周期：组件挂载完成后执
 onMounted(() => {
     try {
-      const saved = sessionStorage.getItem(STORAGE_KEY)
+      const saved = sessionStorage.getItem(SessionStorage.VIEW_CURRENT)
       if (saved && saved in compMap) {
         // @ts-ignore
         current.value = saved
@@ -29,16 +25,21 @@ onBeforeUnmount(() => {
 
 })
 
-const handleEditorToggle = (nextState) => {
+const handleEditorToggle = (nextState: ComponentMapKey) => {
   current.value = nextState
-  try { sessionStorage.setItem(STORAGE_KEY, String(current.value)) } catch {}
+  try {
+    sessionStorage.setItem(SessionStorage.VIEW_CURRENT, String(current.value))
+  } catch {}
 }
 
 
-const current = ref("dailyBase"); // 控制显示哪个
+type ComponentMapKey = 'dailyBase' | 'Plan_I' | 'Plan_II';
+
+const current = ref<ComponentMapKey>("dailyBase"); // 控制显示哪个
 const compMap = {
   dailyBase: dailyBanner,
-  checklist: checklistBanner,
+  Plan_I: checklistBanner,
+  Plan_II: checklistBanner
 } as const;
 </script>
 <template>

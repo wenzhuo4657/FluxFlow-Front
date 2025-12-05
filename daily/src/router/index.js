@@ -4,13 +4,14 @@ import Login from '@/page/login/login.vue';
 import Oauth from '@/page/oauth/Oauth.vue';
 import { useAuthStore } from '@/storage/auth';
 import Layout from '@/page/home/layout.vue';
+import { LocalStorage } from '@/constants/storage';
 
 const routes = [
   {
     path: '/',
     name: 'Root',
     redirect: () => {
-      const token = localStorage.getItem('token')
+      const token = localStorage.getItem(LocalStorage.TOKEN)
       console.log('Root redirect check:', { token: token ? 'exists' : 'none' })
       return token ? '/home' : '/login'
     }

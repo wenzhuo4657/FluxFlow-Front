@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { EventBus, Events } from '@/envBus/envBus'
-import { getTypesWithItems } from '@/services/request'
-import type { ContentNameDto } from '@/type/ContentNameDto'
+import { getTypesWithItems, ContentData } from '@/services/request'
+
 import { ArrowDown } from '@element-plus/icons-vue'
+import { SessionStorage } from '@/constants/storage'
 
-const STORAGE_TYPE_ID = 'view.typeId'
-const STORAGE_CN_ID = 'view.contentNameId'
 
-const items = ref<ContentNameDto[]>([])
+const items = ref<ContentData[]>([])
 const label = ref<string>('选择内容')
 const currentTypeId = ref<string | null>(null)
 
@@ -22,16 +21,15 @@ async function loadByTypeId(typeId: string) {
   console.log('Loading content for typeId:', typeId)
 
   try {
-    const json = await getTypesWithItems({id: typeId})
-    const list = Array.isArray(json) ? json : json?.data
+    const list = await getTypesWithItems({ id: typeId })
     if (Array.isArray(list)) {
-      items.value = list as ContentNameDto[]
+      items.value = list
       // 重置展示文案
       label.value = '选择内容'
       // 恢复上次内容选择（如果兼容当前类型）
       try {
-        const saved = Number(sessionStorage.getItem(STORAGE_CN_ID))
-        if (!Number.isNaN(saved)) {
+        const saved = String(sessionStorage.getItem(SessionStorage.VIEW_DOCS_ID) || '')
+        if (saved && saved !== 'null' && saved !== 'undefined') {
           const target = items.value.find(it => it.id === saved)
           if (target) {
             label.value = target.name
@@ -48,32 +46,32 @@ async function loadByTypeId(typeId: string) {
   }
 }
 
-function onTypeChanged(payload: { id: number; key?: string; name?: string } | number) {
-  const typeId = typeof payload === 'number' ? payload : payload?.id
+function onTypeChanged(payload: { id: string; key?: string; name?: string } | string) {
+  const typeId = typeof payload === 'string' ? payload : payload?.id
 
   // 验证 typeId 是否有效
-  if (!typeId && typeId !== 0) {
+  if (!typeId || typeId === 'null' || typeId === 'undefined') {
     console.log('Invalid typeId in onTypeChanged:', typeId)
     return
   }
 
-  const typeIdStr = String(typeId)
-  console.log('Type changed, new typeId:', typeIdStr)
+  console.log('Type changed, new typeId:', typeId)
 
   // 只需要修改 currentTypeId，watch 会自动调用 loadByTypeId
-  currentTypeId.value = typeIdStr
+  currentTypeId.value = typeId
 }
 
 function onCommand(cmd: number | string) {
-  const idNum = Number(cmd)
-  let target = items.value.find(it => it.id === idNum)
+  let target: ContentData | undefined
+  const idStr = String(cmd)
+  target = items.value.find(it => it.id === idStr)
   if (!target && typeof cmd === 'string') {
     target = items.value.find(it => it.name === cmd)
   }
   if (target) {
     label.value = target.name
     EventBus.$emit(Events.Button_contentName, { id: target.id, name: target.name })
-    try { sessionStorage.setItem(STORAGE_CN_ID, String(target.id)) } catch {}
+    try { sessionStorage.setItem(SessionStorage.VIEW_DOCS_ID, String(target.id)) } catch {}
   }
 }
 

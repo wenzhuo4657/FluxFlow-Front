@@ -1,6 +1,7 @@
 
 
-    export interface UpdateItemRequest{
-        index:string,
-        content:string
-    }
+export interface UpdateItemRequest {
+  index: string;
+  content: string;
+  type?: number;
+}

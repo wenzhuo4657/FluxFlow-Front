@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { EventBus, Events } from '@/envBus/envBus';
+import { EventBus, Events } from '@/envBus/envBus.ts';
 
 import { ref } from 'vue';
 import ButtonView from './elButton/ButtonView.vue';
-import ButtonContentName from './elButton/ButtonContentName.vue';
+import ButtonContentName from './elButton/ButtonDocsId.vue';
 
 
 
@@ -18,6 +18,18 @@ import ButtonContentName from './elButton/ButtonContentName.vue';
 
 <template>
   <div class="buttonBar">
+
+    <!-- 以下两个按钮用于维护用户选择的文档和视图，具体来说是指storage.ts的三个变量，它们可以在会话存储空间中看到
+       /** 当前选择的视图类型 (dailyBase, checklist, Plan_I, Plan_II) */
+  VIEW_CURRENT: 'view.current',
+
+  /** 当前选择的类型ID (number) */
+  VIEW_TYPE_ID: 'view.typeId',
+
+  /** 当前选择的文档ID (string) */
+  VIEW_DOCS_ID: 'view.docsId',
+     
+    -->
 
     <ButtonView></ButtonView>
     <ButtonContentName></ButtonContentName>

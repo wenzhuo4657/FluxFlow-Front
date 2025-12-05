@@ -1,39 +1,35 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { EventBus, Events } from '@/envBus/envBus'
-import { getAllTypes } from '@/services/request'
-import type { TypeDto } from '@/type/TypeDto'
+import { getAllTypes, TypeData } from '@/services/request'
 import { ArrowDown } from '@element-plus/icons-vue'
-import { useAuthStore } from '@/storage/auth'
+import { SessionStorage } from '@/constants/storage'
 
-const STORAGE_TYPE_ID = 'view.typeId'
+// 组件映射键类型
+type ComponentMapKey = 'dailyBase' | 'Plan_I' | 'Plan_II'
 
-const types = ref<TypeDto[]>([])
-const authStore = useAuthStore()
+const types = ref<TypeData[]>([])
+
 
 async function fetchTypes() {
-  // 确保用户已认证
-  const token = authStore.token
-  if (!token || (typeof token === 'object' && 'value' in token && !token.value)) {
-    console.log('User not authenticated, skipping type fetch')
-    return
-  }
-
-  console.log('Fetching types with token:', token.value || token)
-
   try {
-    const json = await getAllTypes()
-    const list = Array.isArray(json) ? json : json?.data
+    const list: TypeData[] = await getAllTypes();
+
     if (Array.isArray(list)) {
-      types.value = list as TypeDto[]
+      types.value = list;
       // 恢复上次类型选择（仅广播类型，视图由 banner 自行恢复）
       try {
-        const saved = Number(sessionStorage.getItem(STORAGE_TYPE_ID))
-        if (!Number.isNaN(saved)) {
+        const saved = String(sessionStorage.getItem(SessionStorage.VIEW_TYPE_ID))
+        if (saved) {
           const t = types.value.find(x => x.id === saved)
           if (t) {
             const name = String(t?.name ?? '').toLowerCase()
-            const viewMap: Record<string, string> = { dailybase: 'dailyBase', checklist: 'checklist' }
+            const viewMap: Record<string, ComponentMapKey> = {
+              dailybase: 'dailyBase',
+              checklist: 'Plan_I',
+              plan_i: 'Plan_I',
+              plan_ii: 'Plan_II'
+            }
             const key = viewMap[name] || 'dailyBase'
             EventBus.$emit(Events.Button_type, { id: t.id, key, name: t.name })
           }
@@ -45,11 +41,13 @@ async function fetchTypes() {
   }
 }
 
-function emitViewByType(t: TypeDto) {
+function emitViewByType(t: TypeData) {
   const name = String(t?.name ?? '').toLowerCase()
-  const viewMap: Record<string, string> = {
+  const viewMap: Record<string, ComponentMapKey> = {
     dailybase: 'dailyBase',
-    checklist: 'checklist',
+    checklist: 'Plan_I',
+    plan_i: 'Plan_I',
+    plan_ii: 'Plan_II',
   }
   const key = viewMap[name] || 'dailyBase'
   EventBus.$emit(Events.Button_view, key)
@@ -58,7 +56,7 @@ function emitViewByType(t: TypeDto) {
   // 确保保存有效的 typeId
   if (t.id !== null && t.id !== undefined) {
     try {
-      sessionStorage.setItem(STORAGE_TYPE_ID, String(t.id))
+      sessionStorage.setItem(SessionStorage.VIEW_TYPE_ID, String(t.id))
       console.log('Saved typeId:', t.id)
     } catch (e) {
       console.error('Failed to save typeId:', e)
@@ -67,10 +65,10 @@ function emitViewByType(t: TypeDto) {
 }
 
 function onCommand(cmd: number | string) {
-  let target: TypeDto | undefined
+  let target: TypeData | undefined
   const idNum = Number(cmd)
   if (!Number.isNaN(idNum)) {
-    target = types.value.find(t => t.id === idNum)
+    target = types.value.find(t => t.id === String(idNum))
   }
   if (!target && typeof cmd === 'string') {
     target = types.value.find(t => t.name === cmd)

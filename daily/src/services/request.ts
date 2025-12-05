@@ -10,7 +10,7 @@ import { GetContentIdsByTypesRequest } from "@/type/requestDto/GetContentIdsByTy
 /**
  * 基础API响应接口
  */
-interface BaseApiResponse<T = any> {
+export interface BaseApiResponse<T = any> {
   success: boolean;
   data?: T;
   message?: string;
@@ -19,7 +19,7 @@ interface BaseApiResponse<T = any> {
 /**
  * 成功响应类型
  */
-interface SuccessResponse<T = any> extends BaseApiResponse<T> {
+export interface SuccessResponse<T = any> extends BaseApiResponse<T> {
   success: true;
   data: T;
 }
@@ -27,7 +27,7 @@ interface SuccessResponse<T = any> extends BaseApiResponse<T> {
 /**
  * 错误响应类型
  */
-interface ErrorResponse extends BaseApiResponse {
+export interface ErrorResponse extends BaseApiResponse {
   success: false;
   message: string;
 }
@@ -36,7 +36,7 @@ interface ErrorResponse extends BaseApiResponse {
  * 获取条目响应数据类型
  * 根据API文档，index为String类型以避免精度损失
  */
-interface ItemData {
+export interface ItemData {
   index: string;
   content: string;
   title: string;
@@ -47,7 +47,7 @@ interface ItemData {
  * 类型数据
  * 根据API文档，id为String类型以避免精度损失
  */
-interface TypeData {
+export interface TypeData {
   id: string;
   name: string;
 }
@@ -56,7 +56,7 @@ interface TypeData {
  * 文档数据
  * 根据API文档，id为String类型以避免精度损失
  */
-interface ContentData {
+export interface ContentData {
   id: string;
   name: string;
 }

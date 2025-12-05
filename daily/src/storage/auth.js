@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { LocalStorage } from '@/constants/storage'
 
 export const useAuthStore = defineStore('auth', () => {
   // State
-  const token = ref(localStorage.getItem('token') || '')
-  const user = ref(JSON.parse(localStorage.getItem('userInfo') || 'null'))
+  const token = ref(localStorage.getItem(LocalStorage.TOKEN) || '')
+  const user = ref(JSON.parse(localStorage.getItem(LocalStorage.USER_INFO) || 'null'))
 
   // Getters
   const isAuthenticated = computed(() => !!token.value)
@@ -12,12 +13,12 @@ export const useAuthStore = defineStore('auth', () => {
   // Actions
   const setToken = (newToken) => {
     token.value = newToken
-    localStorage.setItem('token', newToken)
+    localStorage.setItem(LocalStorage.TOKEN, newToken)
   }
 
   const setUser = (userInfo) => {
     user.value = userInfo
-    localStorage.setItem('userInfo', JSON.stringify(userInfo))
+    localStorage.setItem(LocalStorage.USER_INFO, JSON.stringify(userInfo))
   }
   
 
@@ -25,8 +26,8 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = ''
     user.value = null
 
-    localStorage.removeItem('token')
-    localStorage.removeItem('userInfo')
+    localStorage.removeItem(LocalStorage.TOKEN)
+    localStorage.removeItem(LocalStorage.USER_INFO)
     // 可以在这里调用后端的登出接口
   }
 
