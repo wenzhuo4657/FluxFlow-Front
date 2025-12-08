@@ -77,13 +77,9 @@ export async function getMdByType(data: GetItemsRequest): Promise<ItemData[]> {
     }
   });
 
-  // 严格控制接口返回值：检查success字段
-  if (!res.data.success) {
-    throw new Error(res.data.message || "获取条目失败");
-  }
 
   // 严格返回数据：确保返回数组类型
-  return Array.isArray(res.data.data) ? res.data.data : [];
+  return Array.isArray(res.data) ? res.data : [];
 }
 
 
@@ -121,12 +117,26 @@ export async function updateItemByType(data: UpdateItemRequest): Promise<boolean
     }
   });
 
+
   // 严格控制接口返回值：检查success字段
   if (!res.data.success) {
     throw new Error(res.data.message || "更新条目失败");
   }
 
   return true;
+}
+
+export async function deleteItemByTypes(param:string) {
+  const http = getHttp();
+    const res = await http.post<BaseApiResponse>("/api/item/delete?index="+param);
+
+    // 严格控制接口返回值：检查success字段
+  if (!res.data.success) {
+    throw new Error(res.data.message || "更新条目失败");
+  }
+
+  return true;
+  
 }
 
 

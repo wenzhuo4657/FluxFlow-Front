@@ -33,7 +33,7 @@ async function loadByTypeId(typeId: string) {
           const target = items.value.find(it => it.id === saved)
           if (target) {
             label.value = target.name
-            EventBus.$emit(Events.Button_contentName, { id: target.id, name: target.name })
+            EventBus.$emit(Events.Button_DocsId, { id: target.id, name: target.name })
           }
         }
       } catch {}
@@ -70,7 +70,7 @@ function onCommand(cmd: number | string) {
   }
   if (target) {
     label.value = target.name
-    EventBus.$emit(Events.Button_contentName, { id: target.id, name: target.name })
+    EventBus.$emit(Events.Button_DocsId, { id: target.id, name: target.name })
     try { sessionStorage.setItem(SessionStorage.VIEW_DOCS_ID, String(target.id)) } catch {}
   }
 }
@@ -87,7 +87,7 @@ onMounted(() => {
   EventBus.$on(Events.Button_type, onTypeChanged)
   // 首次进入时尝试根据已保存的类型立即加载
   try {
-    const savedType = sessionStorage.getItem(STORAGE_TYPE_ID)
+    const savedType = sessionStorage.getItem(SessionStorage.VIEW_DOCS_ID)
 
     if (savedType && savedType !== 'null' && savedType !== 'undefined') {
       console.log('Restoring saved typeId:', savedType)
