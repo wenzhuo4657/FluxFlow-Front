@@ -1,5 +1,5 @@
 <script setup>
-import ButtonBar from '@/page/home/components/button/ButtonBar.vue'
+import ButtonBar from '@/page/home/components/button/ButtonBar/ButtonBar.vue'
 import Banner from '@/page/home/components/banner.vue'
 
 import { useI18n } from 'vue-i18n'

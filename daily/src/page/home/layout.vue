@@ -1,5 +1,5 @@
 <script setup>
-import SystemButtonBar from './components/button/SystemButtonBar.vue';
+import SystemButtonBar from './components/button/SystemButtonBar/SystemButtonBar.vue';
 import Home from './Home.vue';
 
 </script>

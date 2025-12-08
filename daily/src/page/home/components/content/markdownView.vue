@@ -1,4 +1,3 @@
-<!-- 该组件以md格式渲染文档， -->
  <script setup lang="ts">
  import { ref, computed, watch } from 'vue'
 import MarkdownIt from 'markdown-it'

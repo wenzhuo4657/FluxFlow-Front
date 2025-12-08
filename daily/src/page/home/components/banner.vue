@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import dailyBanner from '@/page/home/components/typeDaily/daily/dailyBanner.vue'
-import checklistBanner from '@/page/home/components/typeDaily/checklist/checklistBanner.vue';
+import dailyBanner from '@/page/home/typeDaily/daily/dailyBanner.vue'
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { EventBus, Events } from '@/envBus/envBus.ts';
 import { SessionStorage } from '@/constants/storage';
@@ -38,8 +37,6 @@ type ComponentMapKey = 'dailyBase' | 'Plan_I' | 'Plan_II';
 const current = ref<ComponentMapKey>("dailyBase"); // 控制显示哪个
 const compMap = {
   dailyBase: dailyBanner,
-  Plan_I: checklistBanner,
-  Plan_II: checklistBanner
 } as const;
 </script>
 <template>

@@ -2,6 +2,8 @@
 import { useAuthStore } from '@/storage/auth'
 import { useRouter } from 'vue-router'
 import { logout as apiLogout } from '@/services/login'
+import { useI18n } from 'vue-i18n'
+const { t, locale } = useI18n()
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -20,7 +22,7 @@ async function onLogout() {
 
 <template>
   <el-button type="success" plain @click="onLogout">
-    <strong>退出登录</strong>
+    <strong>{{ $t('logout') }}</strong>
   </el-button>
   
 </template>

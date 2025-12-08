@@ -6,7 +6,8 @@ import { GetItemsRequest } from '@/type/requestDto/GetItemsRequest';
 import { InsertItemRequest } from '@/type/requestDto/InsertItemRequest';
 import { ref, watch, onMounted, onUnmounted, onBeforeMount, computed } from 'vue';
 import ItemViewAndEdit from './ItemViewAndEdit.vue';
-
+import { useI18n } from 'vue-i18n'
+const { t, locale } = useI18n()
 
 
 
@@ -103,7 +104,7 @@ const reversedRes = computed(() => {
       <button 
           @click="InsertItem"
           class="button-reset">
-        新增</button>
+        {{ $t('addItem') }}</button>
      
 
     

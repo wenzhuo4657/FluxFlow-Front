@@ -1,10 +1,12 @@
 <script setup lang="ts">
 
 import { deleteItemByTypes, ItemData, updateItemByType } from '@/services/request'
-import MarkdownView from '../../content/markdownView.vue';
 import { ref } from 'vue';
 import { UpdateItemRequest } from '@/type/requestDto/UpdateItemDto';
 import { SessionStorage } from '@/constants/storage';
+import MarkdownView from "@/page/home/components/content/MarkdownView.vue"
+import { useI18n } from 'vue-i18n'
+const { t, locale } = useI18n()
 
 // 使用默认值选项
 const item = defineModel<ItemData>("item",{
@@ -53,15 +55,16 @@ function deleteItem(item: ItemData) {
     <div  class="sqlit">
         <!--按扭区 -->
         <div>
-            <button  @click="editStatus">编辑</button>
-            <button  @click="save">保存</button>
-            <button  @click="deleteItem(item)">删除</button>
+            <button  @click="editStatus">{{ $t('editItem') }}</button>
+            <button  @click="save">{{ $t('saveItem') }}</button>
+            <button  @click="deleteItem(item)">{{ $t('deleteItem') }}</button>
         </div>
       
         <!-- 编辑与预览区 -->
         <div>
                 <div v-if="!edit_val">
         
+              
                  <MarkdownView   v-model="item.content"></MarkdownView>
                     </div>
                 <div v-else  class="editor-wrap">

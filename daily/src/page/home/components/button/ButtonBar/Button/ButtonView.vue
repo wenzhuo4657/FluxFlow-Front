@@ -4,11 +4,14 @@ import { EventBus, Events } from '@/envBus/envBus'
 import { getAllTypes, TypeData } from '@/services/request'
 import { ArrowDown } from '@element-plus/icons-vue'
 import { SessionStorage } from '@/constants/storage'
+import { useI18n } from 'vue-i18n'
+const { t, locale } = useI18n()
 
 // 组件映射键类型
 type ComponentMapKey = 'dailyBase' | 'Plan_I' | 'Plan_II'
 
 const types = ref<TypeData[]>([])
+const label = ref<string>(t('view'))
 
 
 async function fetchTypes() {
@@ -23,6 +26,8 @@ async function fetchTypes() {
         if (saved) {
           const t = types.value.find(x => x.id === saved)
           if (t) {
+            // 同时更新 label 显示
+            label.value = t.name
             const name = String(t?.name ?? '').toLowerCase()
             const viewMap: Record<string, ComponentMapKey> = {
               dailybase: 'dailyBase',
@@ -74,6 +79,8 @@ function onCommand(cmd: number | string) {
     target = types.value.find(t => t.name === cmd)
   }
   if (target) {
+    // 更新按钮显示的 label 为选中的类型名称
+    label.value = target.name
     emitViewByType(target)
   }
 }
@@ -85,7 +92,7 @@ onMounted(fetchTypes)
   <div class="button-view">
     <el-dropdown @command="onCommand">
       <el-button type="success" plain>
-        {{ $t('view') }}
+        {{ label }}
         <el-icon class="el-icon--right"><ArrowDown /></el-icon>
       </el-button>
       <template #dropdown>

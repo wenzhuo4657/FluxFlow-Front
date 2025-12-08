@@ -3,27 +3,35 @@ import { LocalStorage } from '@/constants/storage'
 
 const messages = {
   en: {
-    title: 'Prologue and New Chapter',
+    title: 'record',
     hello: 'Hello',
     switch: 'Switch to Chinese',
-    edit:'edit/preview',
     view:'view select',
     export:'export',
     import:'import',
     todo:'待办',
     finishs:'已完成',
+    logout: "sign out",
+    addItem: "add item",
+    editItem: "edit item",
+    deleteItem: "delete item",
+    saveItem: "save item"
     
   },
   zh: {
-    title: '序幕与新章',
+    title: '记录',
     hello: '你好',
     switch: '切换到英文',
-    edit:'编辑/预览',
     view:'视图选择',
     export:'导出',
     import:'导入',
     todo:'todo',
     finishs:'finishs',
+    logout: "登出",
+    addItem: "添加项",
+    editItem: "编辑",
+    deleteItem: "删除",
+    saveItem: "保存"
     
   },
 }

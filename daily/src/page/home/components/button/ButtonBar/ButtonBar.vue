@@ -2,8 +2,8 @@
 import { EventBus, Events } from '@/envBus/envBus.ts';
 
 import { ref } from 'vue';
-import ButtonView from './elButton/ButtonView.vue';
-import ButtonContentName from './elButton/ButtonDocsId.vue';
+import ButtonView from './Button/ButtonView.vue';
+import ButtonContentName from './Button/ButtonDocsId.vue';
 
 
 

@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../page/home/Home.vue';
-import Login from '@/page/login/login.vue';
+import Login from '@/page/home/login/login.vue';
 import Oauth from '@/page/oauth/Oauth.vue';
 import { useAuthStore } from '@/storage/auth';
 import Layout from '@/page/home/layout.vue';
