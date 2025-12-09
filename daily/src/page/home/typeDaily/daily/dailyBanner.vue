@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { SessionStorage } from '@/constants/storage';
-import { EventBus } from '@/envBus/envBus';
+import { EventBus, Events } from '@/envBus/envBus';
 import { addItemByType, getMdByType, ItemData } from '@/services/request';
 import { GetItemsRequest } from '@/type/requestDto/GetItemsRequest';
 import { InsertItemRequest } from '@/type/requestDto/InsertItemRequest';
@@ -19,12 +19,13 @@ const res = ref<ItemData[]>([])
 const current=ref<ItemData>()
 
 onMounted(() => {
-  EventBus.$on(SessionStorage.VIEW_DOCS_ID, dynamicDocsId)
+  EventBus.$on(Events.Button_DocsId, dynamicDocsId)
   loadDocsId(docsId.value)
+  
 })
 
 onUnmounted(() => {
-  EventBus.$off(SessionStorage.VIEW_DOCS_ID, dynamicDocsId)
+  EventBus.$off(Events.Button_DocsId, dynamicDocsId)
   
 })
 
@@ -46,28 +47,30 @@ watch(docsId, async (newDocsId, oldDocsId) => {
 })
 
 
-// 根据文档id加载渲染内容res
+// 根据文档id加载渲染内容res，并根据缓存来决定选定item
 async function loadDocsId(id:string){
 
   const typeId = sessionStorage.getItem(SessionStorage.VIEW_TYPE_ID) || '';
-  if (typeId == '') {
-    alert("请选择文档")
-    return
-  }
   const data: GetItemsRequest = { docsId: id, type: typeId };
   const result = await getMdByType(data);
   res.value = result;
-  current.value=res.value[0]
 
+  const itemID:string=sessionStorage.getItem(SessionStorage.VIEW_ITEM_ID)|| '';
+
+  current.value=result.find( it => it.index==itemID)
+  if(!current.value){
+    current.value=res.value[res.value.length-1]
+  }
 }
 
 
 
 /**
- * 变更current的函数
+ * 变更current的函数,同时缓存item选择
  */
 function chooseItem(item:ItemData){
   current.value=item
+  sessionStorage.setItem(SessionStorage.VIEW_ITEM_ID,item.index)
 }
 
 async function InsertItem(){

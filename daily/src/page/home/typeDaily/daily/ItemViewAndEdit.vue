@@ -21,11 +21,19 @@ const edit_val=ref(false);
 const tempContent=ref<String>('')
 
 function editStatus(){
+  // 不可重复编辑
+  if(edit_val.value==true){
+    return
+  }
     edit_val.value=true
     tempContent.value=item.value.content
 }
 
 function save(){
+   // 不可重复保存
+  if(edit_val.value==false){
+    return
+  }
     edit_val.value=false
     // 如果tempContent为空，说明没有进入过编辑模式，直接使用item.content
     if (tempContent.value === '') {

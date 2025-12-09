@@ -12,6 +12,15 @@ const items = ref<ContentData[]>([])
 const label = ref<string>('选择内容')
 const currentTypeId = ref<string >('')
 
+
+
+ 
+//处理文档id变更之后的行为
+function changedDocsID(target:ContentData){
+  label.value=target.name
+  EventBus.$emit(Events.Button_DocsId, target.id)
+  sessionStorage.setItem(SessionStorage.VIEW_DOCS_ID,target.id) 
+}
   // 调用api获取当前用户在当前类型下的文档集合,并变更响应变量
 async function loadByTypeId(typeId: string) {
   // 验证 typeId 是否有效
@@ -34,12 +43,12 @@ async function loadByTypeId(typeId: string) {
         if (saved && saved !== 'null' && saved !== 'undefined') {
           const target = items.value.find(it => it.id === saved)
           if (target) {
-            label.value = target.name
+            changedDocsID(target)
+      
           }
         }else{
           // 没有缓存，默认选择第一个元素
-          sessionStorage.setItem(SessionStorage.VIEW_DOCS_ID, String(items.value[0].id)) 
-          label.value=items.value[0].name
+          changedDocsID(items.value[0])
         }
       } catch {
 
@@ -84,8 +93,8 @@ onBeforeUnmount(() => {
 })
 
 // 接收type变更的函数
-function onTypeChanged(payload: { id: string; key?: string; name?: string } | string) {
-  const typeId = typeof payload === 'string' ? payload : payload?.id
+function onTypeChanged(payload:   string) {
+  const typeId = typeof payload === 'string' ? payload : 'null'
 
   // 验证 typeId 是否有效
   if (!typeId || typeId === 'null' || typeId === 'undefined') {
@@ -109,9 +118,7 @@ function onCommand(cmd: number | string) {
     target = items.value.find(it => it.name === cmd)
   }
   if (target) {
-    label.value = target.name
-    EventBus.$emit(Events.Button_DocsId, { id: target.id, name: target.name })
-    try { sessionStorage.setItem(SessionStorage.VIEW_DOCS_ID, String(target.id)) } catch {}
+    changedDocsID(target)
   }
 }
 </script>

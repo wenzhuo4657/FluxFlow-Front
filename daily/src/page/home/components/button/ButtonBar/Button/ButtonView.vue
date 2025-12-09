@@ -8,11 +8,17 @@ import { useI18n } from 'vue-i18n'
 const { t, locale } = useI18n()
 
 // 组件映射键类型
-type ComponentMapKey = 'dailyBase' | 'Plan_I' | 'Plan_II'
 
 const types = ref<TypeData[]>([])
 const label = ref<string>(t('view'))
-
+ 
+// 处理类型选择之后的变化 1，会话缓存 2.通知类型变化
+ function  changedTypeId(target:TypeData){
+  label.value=target.name
+  EventBus.$emit(Events.Button_type, target.id)//通知类型发生变化
+  EventBus.$emit(Events.Button_view,target.name)//通知视图发生变化
+  sessionStorage.setItem(SessionStorage.VIEW_TYPE_ID, String(target.id))
+}
 
 async function fetchTypes() {
   try {
@@ -26,17 +32,7 @@ async function fetchTypes() {
         if (saved) {
           const t = types.value.find(x => x.id === saved)
           if (t) {
-            // 同时更新 label 显示
-            label.value = t.name
-            const name = String(t?.name ?? '').toLowerCase()
-            const viewMap: Record<string, ComponentMapKey> = {
-              dailybase: 'dailyBase',
-              checklist: 'Plan_I',
-              plan_i: 'Plan_I',
-              plan_ii: 'Plan_II'
-            }
-            const key = viewMap[name] || 'dailyBase'
-            EventBus.$emit(Events.Button_type, { id: t.id, key, name: t.name })
+            changedTypeId(t)
           }
         }
       } catch {}
@@ -46,28 +42,7 @@ async function fetchTypes() {
   }
 }
 
-function emitViewByType(t: TypeData) {
-  const name = String(t?.name ?? '').toLowerCase()
-  const viewMap: Record<string, ComponentMapKey> = {
-    dailybase: 'dailyBase',
-    checklist: 'Plan_I',
-    plan_i: 'Plan_I',
-    plan_ii: 'Plan_II',
-  }
-  const key = viewMap[name] || 'dailyBase'
-  EventBus.$emit(Events.Button_view, key)
-  EventBus.$emit(Events.Button_type, { id: t.id, key, name: t.name })
 
-  // 确保保存有效的 typeId
-  if (t.id !== null && t.id !== undefined) {
-    try {
-      sessionStorage.setItem(SessionStorage.VIEW_TYPE_ID, String(t.id))
-      console.log('Saved typeId:', t.id)
-    } catch (e) {
-      console.error('Failed to save typeId:', e)
-    }
-  }
-}
 
 function onCommand(cmd: number | string) {
   let target: TypeData | undefined
@@ -79,9 +54,7 @@ function onCommand(cmd: number | string) {
     target = types.value.find(t => t.name === cmd)
   }
   if (target) {
-    // 更新按钮显示的 label 为选中的类型名称
-    label.value = target.name
-    emitViewByType(target)
+    changedTypeId(target)
   }
 }
 
