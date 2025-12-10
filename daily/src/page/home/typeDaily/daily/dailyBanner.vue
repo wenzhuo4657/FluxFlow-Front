@@ -109,10 +109,7 @@ const reversedRes = computed(() => {
           @click="InsertItem"
           class="button-reset">
         {{ $t('addItem') }}</button>
-     
-
     
-
         <!-- title区：选择item，交给编辑区域，默认为最新 -->
       <button
         v-for="it in reversedRes"
@@ -144,7 +141,7 @@ const reversedRes = computed(() => {
 
 <style scoped>
 .split {
-  height: 100%;
+  height:  80vh;
   width: 100%;
   display: flex;
   flex-direction: row;
@@ -152,12 +149,15 @@ const reversedRes = computed(() => {
 
 .split_title{
   width: 20%;
-   height: 100%;
-   display: flex;        
+  height: 100%;
+  display: flex;        
   flex-direction: column; 
   gap: 8px;
   padding-right: 5%;
-  overflow: auto; 
+
+  overflow-y: auto;           /* 只在这里显示垂直滚动条 */
+  overflow-x: hidden;          /* 隐藏水平滚动条 */
+
 }
 .split_title > div{
   display: flex;
@@ -168,12 +168,13 @@ const reversedRes = computed(() => {
   display: flex;
   width: 75%;
   height: 100%;
-
+  overflow-y: auto;
 }
 
 
 .editor-wrap {
-  flex: 1;           
+  flex: 1;   
+      
 }
 
 .selector{
