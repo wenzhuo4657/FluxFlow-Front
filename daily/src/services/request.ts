@@ -1,36 +1,45 @@
 import { getHttp } from "@/lib/http";
-import { GetItemsRequest } from "@/type/requestDto/GetItemsRequest";
-import { InsertItemRequest } from "@/type/requestDto/InsertItemRequest";
-import { UpdateItemRequest } from "@/type/requestDto/UpdateItemDto";
-import { UpdateCheckListRequest } from "@/type/requestDto/UpdateCheckListRequest";
-import { GetContentIdsByTypesRequest } from "@/type/requestDto/GetContentIdsByTypesRequest";
+
+
+
 
 // ==================== API响应类型定义 ====================
 
 /**
- * 基础API响应接口
+ * 统一响应体包装类
  */
-export interface BaseApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  message?: string;
-}
-
-/**
- * 成功响应类型
- */
-export interface SuccessResponse<T = any> extends BaseApiResponse<T> {
-  success: true;
+export interface ApiResponse<T = any >{
+  code: number;
+  message: string;
   data: T;
 }
 
-/**
- * 错误响应类型
- */
-export interface ErrorResponse extends BaseApiResponse {
-  success: false;
-  message: string;
+export interface GetContentIdsByTypesRequest{
+        id:string,
 }
+
+
+export interface GetItemsRequest{
+        docsId:string,
+        type:string,
+}
+
+
+export interface InsertItemRequest{
+        docsId:string,
+        type:string,
+}
+
+    export interface UpdateCheckListRequest{
+        index:string,
+        title:string
+    }
+    export interface UpdateItemRequest {
+  index: string;
+  content: string;
+}
+
+
 
 /**
  * 获取条目响应数据类型
@@ -70,7 +79,7 @@ export interface ContentData {
  */
 export async function getMdByType(data: GetItemsRequest): Promise<ItemData[]> {
   const http = getHttp();
-  const res = await http.post<SuccessResponse<ItemData[]>>("/api/item/get", data, {
+  const res = await http.post<ApiResponse<ItemData[]>>("/api/item/get", data, {
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
@@ -79,7 +88,7 @@ export async function getMdByType(data: GetItemsRequest): Promise<ItemData[]> {
 
 
   // 严格返回数据：确保返回数组类型
-  return Array.isArray(res.data) ? res.data : [];
+  return Array.isArray(res.data.data) ? res.data.data : [];
 }
 
 
@@ -90,18 +99,15 @@ export async function getMdByType(data: GetItemsRequest): Promise<ItemData[]> {
  */
 export async function addItemByType(data: InsertItemRequest): Promise<boolean> {
   const http = getHttp();
-  const res = await http.post<BaseApiResponse>("/api/item/insert", data, {
+  const res = await http.post<ApiResponse>("/api/item/insert", data, {
     headers: {
       "Content-Type": "application/json",
     }
   });
 
-  // 严格控制接口返回值：检查success字段
-  if (!res.data.success) {
-    throw new Error(res.data.message || "新增条目失败");
-  }
+ 
 
-  return true;
+   return res.data.code==200;
 }
 
 /**
@@ -111,31 +117,23 @@ export async function addItemByType(data: InsertItemRequest): Promise<boolean> {
  */
 export async function updateItemByType(data: UpdateItemRequest): Promise<boolean> {
   const http = getHttp();
-  const res = await http.post<BaseApiResponse>("/api/item/update", data, {
+  const res = await http.post<ApiResponse>("/api/item/update", data, {
     headers: {
       "Content-Type": "application/json",
     }
   });
 
 
-  // 严格控制接口返回值：检查success字段
-  if (!res.data.success) {
-    throw new Error(res.data.message || "更新条目失败");
-  }
 
-  return true;
+
+  return res.data.code==200;
 }
 
 export async function deleteItemByTypes(param:string) {
   const http = getHttp();
-    const res = await http.post<BaseApiResponse>("/api/item/delete?index="+param);
+    const res = await http.post<ApiResponse>("/api/item/delete?index="+param);
 
-    // 严格控制接口返回值：检查success字段
-  if (!res.data.success) {
-    throw new Error(res.data.message || "更新条目失败");
-  }
-
-  return true;
+  return res.data.code==200;
   
 }
 
@@ -181,10 +179,10 @@ export async function DownLoadFile() {
  */
 export async function upload(data: FormData): Promise<boolean> {
   const http = getHttp();
-  const res = await http.post("/api/upload", data, {
+  const res = await http.post<ApiResponse>("/api/upload", data, {
     headers: { 'Content-Type': 'multipart/form-data' }
   });
-  return !!res.data;
+  return res.data.code==200;
 }
 
 /**
@@ -194,18 +192,15 @@ export async function upload(data: FormData): Promise<boolean> {
  */
 export async function updateCheckListTitle(data: UpdateCheckListRequest): Promise<boolean> {
   const http = getHttp();
-  const res = await http.post<BaseApiResponse>("/api/item/field/checklist/title", data, {
+  const res = await http.post<ApiResponse>("/api/item/field/checklist/title", data, {
     headers: {
       "Content-Type": "application/json",
     }
   });
 
-  // 严格控制接口返回值：检查success字段
-  if (!res.data.success) {
-    throw new Error(res.data.message || "更新检查清单标题失败");
-  }
 
-  return true;
+
+  return res.data.code==200;
 }
 
 /**
@@ -215,18 +210,12 @@ export async function updateCheckListTitle(data: UpdateCheckListRequest): Promis
  */
 export async function updateCheckListStatus(id: string): Promise<boolean> {
   const http = getHttp();
-  const res = await http.post<BaseApiResponse>("/api/item/field/checklist/finish", { id }, {
+  const res = await http.post<ApiResponse>("/api/item/field/checklist/finish", { id }, {
     headers: {
       "Content-Type": "application/json",
     }
   });
-
-  // 严格控制接口返回值：检查success字段
-  if (!res.data.success) {
-    throw new Error(res.data.message || "完成检查清单失败");
-  }
-
-  return true;
+  return res.data.code==200;
 }
 
 /**
@@ -235,7 +224,7 @@ export async function updateCheckListStatus(id: string): Promise<boolean> {
  */
 export async function getAllTypes(): Promise<TypeData[]> {
   const http = getHttp();
-  const res = await http.get<TypeData[]>("/api/types/getAllTypes", {
+  const res = await http.get<ApiResponse<TypeData[]>>("/api/types/getAllTypes", {
     headers: {
       Accept: "application/json",
     },
@@ -243,7 +232,7 @@ export async function getAllTypes(): Promise<TypeData[]> {
   });
 
   // 严格控制接口返回值：确保返回数组类型
-  return Array.isArray(res.data) ? res.data : [];
+  return Array.isArray(res.data.data) ? res.data.data : [];
 }
 
 /**
@@ -253,7 +242,7 @@ export async function getAllTypes(): Promise<TypeData[]> {
  */
 export async function getTypesWithItems(data: GetContentIdsByTypesRequest): Promise<ContentData[]> {
   const http = getHttp();
-  const res = await http.post<ContentData[]>("/api/types/getContentIdsByTypes", data, {
+  const res = await http.post<ApiResponse<ContentData[]>>("/api/types/getContentIdsByTypes", data, {
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
@@ -262,7 +251,7 @@ export async function getTypesWithItems(data: GetContentIdsByTypesRequest): Prom
   });
 
   // 严格控制接口返回值：确保返回数组类型
-  return Array.isArray(res.data) ? res.data : [];
+  return Array.isArray(res.data.data) ? res.data.data : [];
 }
 
 /**

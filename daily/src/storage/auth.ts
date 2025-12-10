@@ -1,22 +1,32 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, Ref } from 'vue'
 import { LocalStorage } from '@/constants/storage'
+
+// 用户信息类型定义
+export interface UserInfo {
+  id?: string
+  username?: string
+  email?: string
+  avatar?: string
+  name?: string
+  [key: string]: any
+}
 
 export const useAuthStore = defineStore('auth', () => {
   // State
-  const token = ref(localStorage.getItem(LocalStorage.TOKEN) || '')
-  const user = ref(JSON.parse(localStorage.getItem(LocalStorage.USER_INFO) || 'null'))
+  const token: Ref<string> = ref(localStorage.getItem(LocalStorage.TOKEN) || '')
+  const user: Ref<UserInfo | null> = ref(JSON.parse(localStorage.getItem(LocalStorage.USER_INFO) || 'null'))
 
   // Getters
   const isAuthenticated = computed(() => !!token.value)
 
   // Actions
-  const setToken = (newToken) => {
+  const setToken = (newToken: string) => {
     token.value = newToken
     localStorage.setItem(LocalStorage.TOKEN, newToken)
   }
 
-  const setUser = (userInfo) => {
+  const setUser = (userInfo: UserInfo | null) => {
     user.value = userInfo
     localStorage.setItem(LocalStorage.USER_INFO, JSON.stringify(userInfo))
   }

@@ -12,7 +12,7 @@ const { t, locale } = useI18n()
 const types = ref<TypeData[]>([])
 const label = ref<string>(t('view'))
  
-// 处理类型选择之后的变化 1，会话缓存 2.通知类型变化
+
  function  changedTypeId(target:TypeData){
   label.value=target.name
   EventBus.$emit(Events.Button_type, target.id)//通知类型发生变化
@@ -23,9 +23,11 @@ const label = ref<string>(t('view'))
 async function fetchTypes() {
   try {
     const list: TypeData[] = await getAllTypes();
+    changedTypeId(list[0])
 
     if (Array.isArray(list)) {
       types.value = list;
+      
       // 恢复上次类型选择（仅广播类型，视图由 banner 自行恢复）
       try {
         const saved = String(sessionStorage.getItem(SessionStorage.VIEW_TYPE_ID))
@@ -58,7 +60,9 @@ function onCommand(cmd: number | string) {
   }
 }
 
-onMounted(fetchTypes)
+onMounted(()=>{
+  fetchTypes()
+})
 </script>
 
 <template>

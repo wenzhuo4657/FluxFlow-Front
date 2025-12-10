@@ -76,7 +76,7 @@ onMounted(() => {
   EventBus.$on(Events.Button_type, onTypeChanged)
   try {
     // 
-    const savedType = sessionStorage.getItem(SessionStorage.VIEW_DOCS_ID)
+    const savedType = sessionStorage.getItem(SessionStorage.VIEW_TYPE_ID)
 
     if (savedType && savedType !== 'null' && savedType !== 'undefined') {
       console.log('Restoring saved typeId:', savedType)

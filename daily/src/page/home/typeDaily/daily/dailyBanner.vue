@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { SessionStorage } from '@/constants/storage';
 import { EventBus, Events } from '@/envBus/envBus';
-import { addItemByType, getMdByType, ItemData } from '@/services/request';
-import { GetItemsRequest } from '@/type/requestDto/GetItemsRequest';
-import { InsertItemRequest } from '@/type/requestDto/InsertItemRequest';
+import { addItemByType, GetItemsRequest, getMdByType, InsertItemRequest, ItemData } from '@/services/request';
 import { ref, watch, onMounted, onUnmounted, onBeforeMount, computed } from 'vue';
 import ItemViewAndEdit from './ItemViewAndEdit.vue';
 import { useI18n } from 'vue-i18n'
@@ -49,6 +47,9 @@ watch(docsId, async (newDocsId, oldDocsId) => {
 
 // 根据文档id加载渲染内容res，并根据缓存来决定选定item
 async function loadDocsId(id:string){
+  if(id===''){
+    return 
+  }
 
   const typeId = sessionStorage.getItem(SessionStorage.VIEW_TYPE_ID) || '';
   const data: GetItemsRequest = { docsId: id, type: typeId };

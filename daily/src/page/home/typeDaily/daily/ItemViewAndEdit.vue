@@ -1,8 +1,7 @@
 <script setup lang="ts">
 
-import { deleteItemByTypes, ItemData, updateItemByType } from '@/services/request'
+import { deleteItemByTypes, ItemData, updateItemByType, UpdateItemRequest } from '@/services/request'
 import { ref } from 'vue';
-import { UpdateItemRequest } from '@/type/requestDto/UpdateItemDto';
 import { SessionStorage } from '@/constants/storage';
 import MarkdownView from "@/page/home/components/content/MarkdownView.vue"
 import { useI18n } from 'vue-i18n'

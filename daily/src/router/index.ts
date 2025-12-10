@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import Home from '../page/home/Home.vue';
 import Login from '@/page/home/login/login.vue';
 import Oauth from '@/page/oauth/Oauth.vue';
@@ -6,7 +6,7 @@ import { useAuthStore } from '@/storage/auth';
 import Layout from '@/page/home/layout.vue';
 import { LocalStorage } from '@/constants/storage';
 
-const routes = [
+const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'Root',
@@ -45,15 +45,14 @@ const router = createRouter({
 
 router.beforeEach((to, from) => {
   const auth = useAuthStore();
-  // 检查 token（支持 ref）
-  const token = auth.token;
-  const tokenValue = (token && typeof token === 'object' && 'value' in token) ? token.value : token;
-  const authed = !!tokenValue;
+  // 检查 token
+  const token = auth.token ? (auth.token as any).value || auth.token : '';
+  const authed = !!token;
 
   console.log('Route guard check:', {
     to: to.name,
     hasToken: authed,
-    token: tokenValue
+    token: token
   });
 
   if (to.meta.requiresAuth && !authed) {
