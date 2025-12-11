@@ -3,8 +3,8 @@
 import { deleteItemByTypes, ItemData, updateItemByType, UpdateItemRequest } from '@/services/request'
 import { ref } from 'vue';
 import { SessionStorage } from '@/constants/storage';
-import MarkdownView from "@/page/home/components/content/MarkdownView.vue"
 import { useI18n } from 'vue-i18n'
+import MarkdownView from '../../components/content/markdownView.vue';
 const { t, locale } = useI18n()
 
 // 使用默认值选项
