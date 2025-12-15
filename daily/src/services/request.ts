@@ -255,23 +255,21 @@ export async function getTypesWithItems(data: GetContentIdsByTypesRequest): Prom
 }
 
 /**
- * 用户登出
- * @returns 登出结果（严格检查响应状态）
+ * 获取背景图片URL
+ * @returns 背景图片URL字符串
  */
-export async function logout(): Promise<boolean> {
-  const http = getHttp();
-  const res = await http.post("/api/oauth/logout", {}, {
-    headers: {
+export async function getBackgroundUrl(): Promise<void> {
+   const http = getHttp();
+  const res = await http.get<ApiResponse<string>>("/api/config/background", {
+        headers: {
       "Content-Type": "application/json",
+      Accept: "application/json",
     },
     responseType: "json"
-  });
-
-  // 严格控制接口返回值：检查登出结果
-  // API文档显示直接返回 true/false
-  if (res.data !== true) {
-    throw new Error("登出失败");
+  })
+  if(res.data.data){
+    document.documentElement.style.setProperty('--cdn-url', `url(${res.data.data})`)
+  }else{
+    console.log("无背景图片")
   }
-
-  return true;
 }

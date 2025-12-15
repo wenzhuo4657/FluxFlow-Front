@@ -5,6 +5,7 @@ import { EventBus, Events } from '@/envBus/envBus.ts';
 import { SessionStorage } from '@/constants/storage';
 
 import { useI18n } from 'vue-i18n'
+import { getBackgroundUrl } from '@/services/request';
 
 
 // vue组件生命周期：组件挂载完成后执
@@ -17,12 +18,17 @@ onMounted(() => {
       }
     } catch {}
     EventBus.$on(Events.Button_view,handleEditorToggle)
+
+
+    // 刷新背景图片
+    getBackgroundUrl()
 })
 // vue组件生命周期：在组件实例被卸载之前调用
 onBeforeUnmount(() => {
     EventBus.$off(Events.Button_view,handleEditorToggle)
 
 })
+
 
 const handleEditorToggle = (nextState: ComponentMapKey) => {
   current.value = nextState
