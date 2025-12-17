@@ -1,16 +1,13 @@
 <script setup>
 import ButtonBar from '@/page/home/components/button/ButtonBar/ButtonBar.vue'
 import Banner from '@/page/home/typeDaily/banner.vue'
-import NoteWindow from '@/page/home/components/content/window.vue'
-
 import { useI18n } from 'vue-i18n'
 import { ref } from 'vue'
+import StickyNote from './StickyNote/StickyNote.vue'
 
 const { t } = useI18n()
 
-// 便签窗口状态
-const showNoteWindow = ref(true)
-const noteContent = ref(`# 欢`)
+
 
 </script>
 
@@ -27,14 +24,9 @@ const noteContent = ref(`# 欢`)
         <div  class="banner">
           <Banner></Banner>
         </div>
+        <StickyNote></StickyNote>
 
-        <!-- 便签窗口演示 -->
-        <NoteWindow
-          v-if="showNoteWindow"
-          v-model:content="noteContent"
-          title="Sticky note"
-          @close="showNoteWindow = false"
-        />
+     
   </div>
 
 </template>

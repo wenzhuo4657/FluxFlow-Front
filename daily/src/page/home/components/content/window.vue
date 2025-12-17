@@ -16,20 +16,69 @@
           <el-icon class="title-icon"><Document /></el-icon>
           <span>{{ title }}</span>
         </div>
+        <!-- 编辑/保存按钮 -->
+        <div class="window-actions">
+          <el-button
+            v-if="!isEditing"
+            type="text"
+            size="small"
+            @click.stop="startEditing"
+            class="action-button"
+          >
+            <el-icon><Edit /></el-icon>
+          </el-button>
+          <template v-else>
+            <el-button
+              type="text"
+              size="small"
+              @click.stop="cancelEditing"
+              class="action-button cancel-button"
+            >
+              <el-icon><Close /></el-icon>
+            </el-button>
+            <el-button
+              type="text"
+              size="small"
+              @click.stop="saveEditing"
+              class="action-button save-button"
+            >
+              <el-icon><Check /></el-icon>
+            </el-button>
+          </template>
+        </div>
       </div>
 
       <!-- 内容区域 -->
       <div class="window-body">
         <div class="content-wrapper">
-          <!-- 使用原生渲染，避免 markdown-view 组件可能的问题 -->
-          <div
-            v-if="content && content.trim()"
-            class="markdown-content"
-            v-html="renderedContent"
-          ></div>
-          <div v-else class="empty-content">
-            <el-icon class="empty-icon"><EditPen /></el-icon>
-            <p>点击标题栏可折叠便签</p>
+          <!-- 查看模式 -->
+          <div v-if="!isEditing">
+            <!-- 使用原生渲染，避免 markdown-view 组件可能的问题 -->
+            <div
+              v-if="content && content.trim()"
+              class="markdown-content"
+              v-html="renderedContent"
+            ></div>
+            <div v-else class="empty-content">
+              <el-icon class="empty-icon"><EditPen /></el-icon>
+              <p>点击标题栏可折叠便签，点击编辑按钮开始编辑内容</p>
+            </div>
+          </div>
+
+          <!-- 编辑模式 -->
+          <div v-else class="editing-container">
+            <el-input
+              v-model="editingContent"
+              type="textarea"
+              :rows="15"
+              resize="none"
+              placeholder="请输入 Markdown 内容..."
+              class="content-editor"
+              @keydown.ctrl.enter="saveEditing"
+            />
+            <div class="editing-hint">
+              <small>提示：支持 Markdown 语法，按 Ctrl+Enter 快速保存</small>
+            </div>
           </div>
         </div>
       </div>
@@ -49,7 +98,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onUnmounted } from 'vue'
-import { Document, EditPen } from '@element-plus/icons-vue'
+import { Document, EditPen, Edit, Check, Close } from '@element-plus/icons-vue'
 import MarkdownIt from 'markdown-it'
 import DOMPurify from 'dompurify'
 
@@ -77,8 +126,10 @@ const props = withDefaults(defineProps<Props>(), {
 // 响应式状态
 const isCollapsed = ref(false)
 const isDragging = ref(false)
+const isEditing = ref(false)
 // 优先使用 content prop（v-model），其次使用 initialContent
 const internalContent = ref(props.content || props.initialContent || '')
+const editingContent = ref('')
 const position = ref({ ...props.initialPosition })
 const dragOffset = ref({ x: 0, y: 0 })
 
@@ -224,6 +275,23 @@ const stopDrag = () => {
   document.removeEventListener('mouseup', stopDrag)
 }
 
+// 编辑相关方法
+const startEditing = () => {
+  isEditing.value = true
+  editingContent.value = internalContent.value
+}
+
+const cancelEditing = () => {
+  isEditing.value = false
+  editingContent.value = ''
+}
+
+const saveEditing = () => {
+  internalContent.value = editingContent.value
+  isEditing.value = false
+  editingContent.value = ''
+}
+
 // 事件发射
 const emit = defineEmits<{
   'update:content': [value: string]
@@ -293,6 +361,7 @@ onUnmounted(() => {
 .window-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 12px 16px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -312,7 +381,35 @@ onUnmounted(() => {
   gap: 8px;
   font-weight: 500;
   font-size: 14px;
-  width: 100%;
+  flex: 1;
+}
+
+.window-actions {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.action-button {
+  color: white !important;
+  padding: 4px !important;
+  min-height: 24px !important;
+  width: 24px !important;
+  border-radius: 4px !important;
+  transition: all 0.2s !important;
+}
+
+.action-button:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  transform: scale(1.1);
+}
+
+.cancel-button:hover {
+  background-color: rgba(245, 108, 108, 0.8) !important;
+}
+
+.save-button:hover {
+  background-color: rgba(103, 194, 58, 0.8) !important;
 }
 
 .title-icon {
@@ -473,6 +570,47 @@ onUnmounted(() => {
   margin: 0;
   font-size: 14px;
   line-height: 1.5;
+}
+
+/* 编辑模式样式 */
+.editing-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-editor {
+  flex: 1;
+  height: 100% !important;
+}
+
+.content-editor :deep(.el-textarea__inner) {
+  height: 100% !important;
+  resize: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 16px;
+  background: #fafafa;
+  color: #333;
+}
+
+.content-editor :deep(.el-textarea__inner):focus {
+  box-shadow: none;
+  background: white;
+}
+
+.editing-hint {
+  padding: 8px 16px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  color: #6c757d;
+  text-align: center;
+  font-size: 12px;
+  flex-shrink: 0;
 }
 
 /* 折叠状态样式 */
