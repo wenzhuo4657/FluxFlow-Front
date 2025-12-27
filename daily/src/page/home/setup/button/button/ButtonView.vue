@@ -10,20 +10,18 @@ const { t, locale } = useI18n()
 // 组件映射键类型
 
 const types = ref<TypeData[]>([])
-const label = ref<string>(t('view'))
  
 
  function  changedTypeId(target:TypeData){
-  label.value=target.name
-  EventBus.$emit(Events.Button_type, target.id)//通知类型发生变化
-  EventBus.$emit(Events.Button_view,target.name)//通知视图发生变化
   sessionStorage.setItem(SessionStorage.VIEW_TYPE_ID, String(target.id))
+  
+  EventBus.$emit(Events.Refresh_Home,null)
+
 }
 
 async function fetchTypes() {
   try {
     const list: TypeData[] = await getAllTypes();
-    changedTypeId(list[0])
 
     if (Array.isArray(list)) {
       types.value = list;
@@ -66,28 +64,42 @@ onMounted(()=>{
 </script>
 
 <template>
-  <div class="button-view">
-    <el-dropdown @command="onCommand">
-      <el-button type="success" plain>
-        {{ label }}
-        <el-icon class="el-icon--right"><ArrowDown /></el-icon>
-      </el-button>
-      <template #dropdown>
-        <el-dropdown-menu>
-          <el-dropdown-item
+
+  <el-scrollbar class="button-view">
+         
+      
+            <el-button
             v-for="it in types"
             :key="it.id"
-            :command="it.id"
+            class="item"
+            @click="onCommand(it.id)"
           >
             {{ it.name }}
-          </el-dropdown-item>
-        </el-dropdown-menu>
-      </template>
-    </el-dropdown>
-  </div>
-  
+          </el-button>
+  </el-scrollbar>
+
+
+
+       
+
 </template>
 
 <style scoped>
-.button-view { display: flex; }
+.button-view { 
+    height: 100%;
+    width: 100%;
+}
+
+.item{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 5%;
+  text-align: center;
+  border-radius: 4px;
+  background: var(--el-color-primary-light-9);
+  color: var(--el-color-primary);
+}
+
 </style>

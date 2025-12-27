@@ -8,6 +8,8 @@ import { useI18n } from 'vue-i18n'
 import { getBackgroundUrl } from '@/services/request';
 
 
+// TODO 当前视图渲染有问题，这里只要求存在文档类型id
+
 // vue组件生命周期：组件挂载完成后执
 onMounted(() => {
     try {

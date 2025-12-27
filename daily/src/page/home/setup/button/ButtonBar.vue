@@ -2,8 +2,9 @@
 import { EventBus, Events } from '@/envBus/envBus.ts';
 
 import { ref } from 'vue';
-import ButtonView from './Button/ButtonView.vue';
-import ButtonContentName from './Button/ButtonDocsId.vue';
+import ButtonView from './button/ButtonView.vue';
+import ButtonDocsId from './button/ButtonDocsId.vue';
+
 
 
 
@@ -32,7 +33,8 @@ import ButtonContentName from './Button/ButtonDocsId.vue';
     -->
 
     <ButtonView></ButtonView>
-    <ButtonContentName></ButtonContentName>
+  
+    <ButtonDocsId></ButtonDocsId>
 
 
 <!-- 重构项目 -->

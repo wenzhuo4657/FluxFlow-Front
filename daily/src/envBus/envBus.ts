@@ -7,7 +7,8 @@ export const Events = Object.freeze({
   Button_edit: 'button:edit' as EventName,
   Button_view: 'button:view' as EventName,
   Button_type: 'button:type' as EventName,
-  Button_DocsId: 'button:docsId' as EventName
+  Button_DocsId: 'button:docsId' as EventName,
+  Refresh_Home: 'Refresh:home' as EventName
 });
 
 // SimpleEventBus 类 - 简单事件总线实现

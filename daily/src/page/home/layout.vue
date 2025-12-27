@@ -1,36 +1,99 @@
-<script setup>
+<script setup lang="ts">
+import { ref } from 'vue';
 import SystemButtonBar from './components/button/SystemButtonBar/SystemButtonBar.vue';
 import Home from './Home.vue';
+import setup from './setup/setup.vue';
+import { computed } from 'vue';
+
+
+const sidebarOpen= ref(false);//侧边栏显示/隐藏开关
+
+function toggleSidebar(){
+  sidebarOpen.value=!sidebarOpen.value
+}
+
+
 
 </script>
-<!-- 左右分栏布局 -->
+
+<!-- 
+编写要点
+1，每个page只有layout.vue组件，能够使用vw、vh，其余子组件尽量根据父容器、父组件的高度决定自身大小
+%： 该单位的使用需要依赖明确的参考对象，
+父元素要有明确高度，或者同样适用百分号，但最终一定能够链式追溯到一个明确的高度
+
+-->
+
+
+
+
+
+
 <template>
-  <!-- 左上侧是系统级别功能   导入导出  国际化语言切换  登录信息  退出登录-->
-   <!-- 右侧是分为文档选择和文档编辑，   -->
-    <!-- 文档选择： 文档类型和文档名称 -->
-     <!-- 文档编辑， 具体的文档类型各异 -->
-      <div class="floating-bar">
-          <SystemButtonBar></SystemButtonBar>
+
+   
+<div  class="any">
+
+
+       <div
+       class="sidebar"
+       :class="{ 'sidebar-open': sidebarOpen,'sidebar-close': !sidebarOpen}"
+       >
+          <div >
+            <img
+            v-on:click="toggleSidebar"
+            src="/images/setup.svg"
+            style="width: 2vw;height: 2vw; "
+            alt="出错了">
+          </div>
+          <setup  v-model:sidebarOpen=sidebarOpen></setup>
       </div>
+
       <div class="body">
+   
         <Home></Home>
       </div>
+</div>
+ 
       
 </template>
 
 <style>
 
-.body{
-  width: 100vw;
-  height: 100vh;
-  background-color: rgb(244, 246, 248);
+.any{
+  display: flex;
+  background: rgb(222, 215, 171);
+  flex-direction: row;
+  overflow: hidden;
 }
 
-/* 让第一个盒子不占位：悬浮在视口左上角 */
-.floating-bar{
-  position: fixed;
-  top: 12px;
-  left: 12px;
-  z-index: 1000;
+
+
+.body{
+  min-width: 80vw;
+  height: 100vh;
 }
+.sidebar{
+  transition: width 0.3s ease;
+  padding: 2vh 0 3vh 0.5vw;
+  top: 0px;
+  left: 0px;
+
+}
+
+.sidebar-open{
+  width: 20vw;
+  height: 95vh;
+  background-color: rgb(147, 190, 227);
+
+  border-radius: 0 12px 12px 0;/*圆角 */
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);/*阴影*/
+
+}
+
+.sidebar-close{
+  width: 2vw;
+  height: 2vw;
+}
+
 </style>
