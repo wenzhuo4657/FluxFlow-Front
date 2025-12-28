@@ -14,9 +14,7 @@ const types = ref<TypeData[]>([])
 
  function  changedTypeId(target:TypeData){
   sessionStorage.setItem(SessionStorage.VIEW_TYPE_ID, String(target.id))
-  
-  EventBus.$emit(Events.Refresh_Home,null)
-
+  EventBus.$emit(Events.Refresh_type,target.id)
 }
 
 async function fetchTypes() {
@@ -59,15 +57,15 @@ function onCommand(cmd: number | string) {
 }
 
 onMounted(()=>{
-  fetchTypes()
+  fetchTypes() 
 })
 </script>
 
 <template>
 
   <el-scrollbar class="button-view">
-         
-      
+
+
             <el-button
             v-for="it in types"
             :key="it.id"
@@ -80,7 +78,6 @@ onMounted(()=>{
 
 
 
-       
 
 </template>
 

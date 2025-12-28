@@ -12,4 +12,7 @@ import { DownLoadFile} from '@/services/request';
               </el-button>
 </template>
 
-<style></style>
+<style>
+
+        
+</style>

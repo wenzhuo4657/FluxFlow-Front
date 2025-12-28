@@ -6,9 +6,13 @@ export type EventCallback<T = any> = (payload: T) => void;
 export const Events = Object.freeze({
   Button_edit: 'button:edit' as EventName,
   Button_view: 'button:view' as EventName,
-  Button_type: 'button:type' as EventName,
-  Button_DocsId: 'button:docsId' as EventName,
-  Refresh_Home: 'Refresh:home' as EventName
+ 
+  Button_DocsId: 'button:docsId' as EventName,//放弃发送这个事件，直接缓存，ui变化通过Refresh_Home
+  // 以下为需要的事件
+  Refresh_Home: 'Refresh:home' as EventName,//用于刷新Home的视图model选择，多个来源
+  Refresh_type: 'Refresh:type' as EventName,//用于ButtonView刷新DocsList的typeId
+
+
 });
 
 // SimpleEventBus 类 - 简单事件总线实现

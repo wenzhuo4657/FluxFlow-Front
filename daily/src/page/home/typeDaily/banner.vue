@@ -48,23 +48,13 @@ const compMap = {
 } as const;
 </script>
 <template>
-  <div class="all banner  banner-size">
-   
-   
-    <div  class="">
-          <component :is="compMap[current]" />
-    </div>
+  <div class=" banner-image  banner-size">
+          <component :is="compMap[current]" />  
   </div>
 </template>
 
 <style>
-.all{
-  display: flex;
-  flex-direction: column
-
-}
-
-.banner{
+.banner-image{
   background-image: var(--cdn-url);  
 
   background-repeat: no-repeat;
@@ -73,11 +63,8 @@ const compMap = {
 }
 
 .banner-size{
-
-  display: block;
   width: 100%;
   height: 100%;
-  overflow: auto; 
 }
 
 

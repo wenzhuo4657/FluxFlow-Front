@@ -18,9 +18,12 @@ const currentTypeId = ref<string >('')
 //处理文档id变更之后的行为
 function changedDocsID(target:ContentData){
   label.value=target.name
-  EventBus.$emit(Events.Button_DocsId, target.id)
-  sessionStorage.setItem(SessionStorage.VIEW_DOCS_ID,target.id) 
+  sessionStorage.setItem(SessionStorage.VIEW_DOCS_ID,target.id)
 }
+
+
+
+
   // 调用api获取当前用户在当前类型下的文档集合,并变更响应变量
 async function loadByTypeId(typeId: string) {
   // 验证 typeId 是否有效
@@ -73,27 +76,16 @@ watch(currentTypeId, (newTypeId, oldTypeId) => {
 })
 
 onMounted(() => {
-  EventBus.$on(Events.Button_type, onTypeChanged)
-  try {
-    // 
-    const savedType = sessionStorage.getItem(SessionStorage.VIEW_TYPE_ID)
-
-    if (savedType && savedType !== 'null' && savedType !== 'undefined') {
-      console.log('Restoring saved typeId:', savedType)
-      currentTypeId.value = savedType
-    } else {
-      console.log('No valid saved typeId found')
-    }
-  } catch (e) {
-    console.error('Failed to restore saved type:', e)
-  }
+  EventBus.$on(Events.Refresh_type, onTypeChanged)
 })
+
+
 onBeforeUnmount(() => {
-  EventBus.$off(Events.Button_type, onTypeChanged)
+  EventBus.$off(Events.Refresh_type, onTypeChanged)
 })
 
 // 接收type变更的函数
-function onTypeChanged(payload:   string) {
+function onTypeChanged(payload:  string) {
   const typeId = typeof payload === 'string' ? payload : 'null'
 
   // 验证 typeId 是否有效
@@ -119,28 +111,45 @@ function onCommand(cmd: number | string) {
   }
   if (target) {
     changedDocsID(target)
+    // 用户手动点击时，才切换到 Banner 视图
+    EventBus.$emit(Events.Refresh_Home, 3)
   }
 }
 </script>
 
 <template>
-  <div class="button-content-name">
-    <el-dropdown @command="onCommand">
-      <el-button type="success" plain>
-        {{ label }}
-        <el-icon class="el-icon--right"><ArrowDown /></el-icon>
-      </el-button>
-      <template #dropdown>
-        <el-dropdown-menu>
-          <el-dropdown-item v-for="it in items" :key="it.id" :command="it.id">
+
+      <el-scrollbar class="button-view">
+            <div class="container">
+            <el-button
+            v-for="it in items"
+            :key="it.id"
+            class="item"
+            @click="onCommand(it.id)"
+          >
             {{ it.name }}
-          </el-dropdown-item>
-        </el-dropdown-menu>
-      </template>
-    </el-dropdown>
-  </div>
+          </el-button>
+          </div>
+  </el-scrollbar>
+
 </template>
 
 <style scoped>
-.button-content-name { display: flex; }
+
+.button-view {
+  height: 100%;
+  width: 100%;
+}
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px;
+}
+
+.item {
+  width: 80px;
+  height: 120px;
+}
 </style>

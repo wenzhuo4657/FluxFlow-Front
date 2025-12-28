@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { EventBus, Events } from '@/envBus/envBus';
 import ButtonView from './button/button/ButtonView.vue';
 import ButtonBar from './button/ButtonBar.vue';
 import UserBar from './button/UserBar.vue';
@@ -6,7 +7,9 @@ import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
-
+function changedModel(type:number){
+      EventBus.$emit(Events.Refresh_Home,type)
+}
 
 
 // 是否隐藏当前元素  true: 不隐藏  ， false： 隐藏
@@ -25,16 +28,17 @@ const sidebarOpen=defineModel('sidebarOpen')
             <!-- 这里放置主内容：文档预览、文档类型列表、配置等 -->
              <!-- <ButtonBar></ButtonBar> -->
             <!--  1， 预览组件，默认路由选项 -->
-             <div class="sidebar-item" >
-                预览
-             </div>
+            <el-button type="success" plain class="sidebar-item" v-on:click="changedModel(1)">
+                   {{t('index')}}
+            </el-button>
 
              <!-- 2,配置组件 -->
-             <div class="sidebar-item">
-                配置
-             </div>
+            <el-button type="success" plain class="sidebar-item" v-on:click="changedModel(5)">
+                    {{t('configuration')}}
+            </el-button>
+    
              <!-- 3， 文档类型组件，展示文档类型 -->
-             <div  class="viewType-banner">
+             <div  class="viewType-banner"  v-on:click="changedModel(2)">
                 <ButtonView></ButtonView>
              </div>
 
@@ -81,13 +85,15 @@ const sidebarOpen=defineModel('sidebarOpen')
 
 .sidebar-item{
     height: 10%;
-    width: 100%;
-    padding-top: 2%;
+    width:  100%;   
+    margin-left: 0 !important; /* 覆盖 Element Plus 的默认样式 */
     box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);    /* 阴影*/
+    text-align: center;
 
 }
 
 .viewType-banner{
+    margin-top: 5%;
     height: 70%;
 }
 

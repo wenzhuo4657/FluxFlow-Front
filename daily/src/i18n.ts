@@ -15,8 +15,22 @@ const messages = {
     addItem: "add item",
     editItem: "edit item",
     deleteItem: "delete item",
-    saveItem: "save item"
-    
+    saveItem: "save item",
+    index:"index",
+    configuration: "configuration",
+    quickActions: "flow",
+    // Index page
+    welcome: "Welcome to Daily Notes",
+    welcomeDesc: "Manage your daily records efficiently and stay organized",
+    documentTypes: "Document Types",
+    recentDocs: "Recent Documents",
+    settings: "Settings",
+    totalTypes: "Total Types",
+    totalDocs: "Total Docs",
+    totalItems: "Total Items",
+    quickAction: "Quick Actions",
+    tipTitle: "Tips",
+    tipContent: "Use the quick actions above to navigate through different sections"
   },
   zh: {
     title: '记录',
@@ -31,8 +45,22 @@ const messages = {
     addItem: "添加项",
     editItem: "编辑",
     deleteItem: "删除",
-    saveItem: "保存"
-    
+    saveItem: "保存",
+    index: "首页",
+    configuration: "配置",
+    quickActions: "flow",
+    // Index page
+    welcome: "欢迎使用日报系统",
+    welcomeDesc: "高效管理您的日报记录，保持井井有条",
+    documentTypes: "文档类型",
+    recentDocs: "最近文档",
+    settings: "设置",
+    totalTypes: "类型总数",
+    totalDocs: "文档总数",
+    totalItems: "条目总数",
+    quickAction: "快速操作",
+    tipTitle: "小贴士",
+    tipContent: "使用上方的快速操作可以在不同视图间切换"
   },
 }
 

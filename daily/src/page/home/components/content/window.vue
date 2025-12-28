@@ -124,7 +124,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 // 响应式状态
-const isCollapsed = ref(false)
+const isCollapsed = ref(true)
 const isDragging = ref(false)
 const isEditing = ref(false)
 // 优先使用 content prop（v-model），其次使用 initialContent

@@ -141,7 +141,7 @@ const reversedRes = computed(() => {
 
 <style scoped>
 .split {
-  height:  80vh;
+  height:  100%;
   width: 100%;
   display: flex;
   flex-direction: row;

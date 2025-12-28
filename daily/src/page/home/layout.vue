@@ -70,6 +70,7 @@ function toggleSidebar(){
 
 
 .body{
+  flex: 1;
   min-width: 80vw;
   height: 100vh;
 }
