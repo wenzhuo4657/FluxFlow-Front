@@ -1,27 +1,26 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { EventBus, Events } from '@/envBus/envBus'
 import { getTypesWithItems, ContentData } from '@/services/request'
+import { useCounterStore } from '@/storage/DocsView'
+import { HomeModels } from '@/storage/DocsView'
 
 import { ArrowDown } from '@element-plus/icons-vue'
 import { SessionStorage } from '@/constants/storage'
 
 // 功能内容
-
+//  TODO 去除事件总线，改为无状态
 const items = ref<ContentData[]>([])
 const label = ref<string>('选择内容')
-const currentTypeId = ref<string >('')
+const currentTypeId = ref<string>('')
 
+const store = useCounterStore()
 
-
- 
 //处理文档id变更之后的行为
 function changedDocsID(target:ContentData){
   label.value=target.name
   sessionStorage.setItem(SessionStorage.VIEW_DOCS_ID,target.id)
+  store.setCurrentDocsId(target.id)
 }
-
-
 
 
   // 调用api获取当前用户在当前类型下的文档集合,并变更响应变量
@@ -66,7 +65,6 @@ async function loadByTypeId(typeId: string) {
 
 
 
-
 // 监听 currentTypeId 变化，自动加载内容
 watch(currentTypeId, (newTypeId, oldTypeId) => {
   if (newTypeId && newTypeId !== oldTypeId) {
@@ -75,17 +73,16 @@ watch(currentTypeId, (newTypeId, oldTypeId) => {
   }
 })
 
-onMounted(() => {
-  EventBus.$on(Events.Refresh_type, onTypeChanged)
-})
-
-
-onBeforeUnmount(() => {
-  EventBus.$off(Events.Refresh_type, onTypeChanged)
-})
+// 监听 store 中的 currentTypeId 变化
+watch(() => store.getCurrentTypeId, (newTypeId) => {
+  if (newTypeId) {
+    currentTypeId.value = newTypeId
+  }
+}, { immediate: true })
 
 // 接收type变更的函数
 function onTypeChanged(payload:  string) {
+  console.log(3)
   const typeId = typeof payload === 'string' ? payload : 'null'
 
   // 验证 typeId 是否有效
@@ -100,6 +97,17 @@ function onTypeChanged(payload:  string) {
   currentTypeId.value = typeId
 }
 
+onMounted(() => {
+  // 初始化时，从store获取当前的typeId
+  if (store.getCurrentTypeId) {
+    currentTypeId.value = store.getCurrentTypeId
+  }
+})
+
+onBeforeUnmount(() => {
+  
+})
+
 
 // 下拉列表的点击函数
 function onCommand(cmd: number | string) {
@@ -112,7 +120,7 @@ function onCommand(cmd: number | string) {
   if (target) {
     changedDocsID(target)
     // 用户手动点击时，才切换到 Banner 视图
-    EventBus.$emit(Events.Refresh_Home, 3)
+    store.setHomeModel(HomeModels.DOC_CONTENT)
   }
 }
 </script>

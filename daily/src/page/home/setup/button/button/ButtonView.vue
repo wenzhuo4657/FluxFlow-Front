@@ -1,43 +1,36 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { EventBus, Events } from '@/envBus/envBus'
 import { getAllTypes, TypeData } from '@/services/request'
 import { ArrowDown } from '@element-plus/icons-vue'
 import { SessionStorage } from '@/constants/storage'
 import { useI18n } from 'vue-i18n'
+import { useCounterStore } from '@/storage/DocsView'
+import { HomeModels } from '@/storage/DocsView'
 const { t, locale } = useI18n()
+
+const store = useCounterStore()
 
 // 组件映射键类型
 
 const types = ref<TypeData[]>([])
  
 
+
  function  changedTypeId(target:TypeData){
-  sessionStorage.setItem(SessionStorage.VIEW_TYPE_ID, String(target.id))
-  EventBus.$emit(Events.Refresh_type,target.id)
+ 
+     store.$patch((state) => {
+      state.currentTypeId = target.id
+      state.currentView = target.name
+})
 }
 
 async function fetchTypes() {
-  try {
+
     const list: TypeData[] = await getAllTypes();
 
     if (Array.isArray(list)) {
       types.value = list;
-      
-      // 恢复上次类型选择（仅广播类型，视图由 banner 自行恢复）
-      try {
-        const saved = String(sessionStorage.getItem(SessionStorage.VIEW_TYPE_ID))
-        if (saved) {
-          const t = types.value.find(x => x.id === saved)
-          if (t) {
-            changedTypeId(t)
-          }
-        }
-      } catch {}
     }
-  } catch (err) {
-    console.error('Failed to load types:', err)
-  }
 }
 
 
@@ -57,6 +50,7 @@ function onCommand(cmd: number | string) {
 }
 
 onMounted(()=>{
+ 
   fetchTypes() 
 })
 </script>

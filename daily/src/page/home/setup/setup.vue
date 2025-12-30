@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { EventBus, Events } from '@/envBus/envBus';
 import ButtonView from './button/button/ButtonView.vue';
 import ButtonBar from './button/ButtonBar.vue';
 import UserBar from './button/UserBar.vue';
 import { useI18n } from 'vue-i18n'
+import { useCounterStore,HomeModels } from '@/storage/DocsView'
 
 const { t } = useI18n()
+const store = useCounterStore()
 
 function changedModel(type:number){
-      EventBus.$emit(Events.Refresh_Home,type)
+      store.setHomeModel(type)
 }
 
 
@@ -28,17 +29,17 @@ const sidebarOpen=defineModel('sidebarOpen')
             <!-- 这里放置主内容：文档预览、文档类型列表、配置等 -->
              <!-- <ButtonBar></ButtonBar> -->
             <!--  1， 预览组件，默认路由选项 -->
-            <el-button type="success" plain class="sidebar-item" v-on:click="changedModel(1)">
+            <el-button type="success" plain class="sidebar-item" v-on:click="changedModel(HomeModels.DEFAULT)">
                    {{t('index')}}
             </el-button>
 
              <!-- 2,配置组件 -->
-            <el-button type="success" plain class="sidebar-item" v-on:click="changedModel(5)">
+            <el-button type="success" plain class="sidebar-item" v-on:click="changedModel(HomeModels.CONFIGURATION)">
                     {{t('configuration')}}
             </el-button>
     
              <!-- 3， 文档类型组件，展示文档类型 -->
-             <div  class="viewType-banner"  v-on:click="changedModel(2)">
+             <div  class="viewType-banner"  v-on:click="changedModel(HomeModels.DOCS_LIST)">
                 <ButtonView></ButtonView>
              </div>
 
@@ -49,25 +50,6 @@ const sidebarOpen=defineModel('sidebarOpen')
 </template>
 <style>
 
-/**
-布局解释： 
-
-  ┌─────────────────────────────┐
-  │   .setup-container          │  height: 100%
-  │   (flex 容器，column 方向)   │
-  │  ┌───────────────────────┐  │
-  │  │                       │  │
-  │  │  .main-content        │  │  flex: 1
-  │  │  (弹性扩展，填充空间)   │  │  ← 占据所有剩余空间！
-  │  │                       │  │
-  │  └───────────────────────┘  │
-  │  ┌───────────────────────┐  │
-  │  │  SystemButtonBar      │  │  自然内容高度
-  │  │  (固定在底部)          │  │  ← 被"推"到底部！
-  │  └───────────────────────┘  │
-
-
- */
 .setup-container {
     height: 100%;  /*  高度100% ，绝对不允许溢出！*/
     width: 100%;

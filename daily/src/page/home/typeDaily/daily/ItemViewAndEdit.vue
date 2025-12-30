@@ -2,10 +2,12 @@
 
 import { deleteItemByTypes, ItemData, updateItemByType, UpdateItemRequest } from '@/services/request'
 import { ref } from 'vue';
-import { SessionStorage } from '@/constants/storage';
 import { useI18n } from 'vue-i18n'
 import MarkdownView from '../../components/content/markdownView.vue';
+import { useCounterStore } from '@/storage/DocsView'
 const { t, locale } = useI18n()
+
+const store = useCounterStore()
 
 // 使用默认值选项
 const item = defineModel<ItemData>("item",{
@@ -47,7 +49,9 @@ function save(){
 
 function deleteItem(item: ItemData) {
   deleteItemByTypes(item.index)
-  location.reload() 
+  // 重新加载文档列表而不是刷新整个页面
+  // 触发刷新以重新加载列表
+  store.triggerRefresh();
 }
 
 

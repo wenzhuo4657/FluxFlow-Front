@@ -2,6 +2,7 @@
 export type EventName = string;
 export type EventCallback<T = any> = (payload: T) => void;
 
+// TODO 删除多余事件总线，使用pinia
 // 预定义的事件名称常量
 export const Events = Object.freeze({
   Button_edit: 'button:edit' as EventName,

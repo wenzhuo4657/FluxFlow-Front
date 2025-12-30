@@ -1,14 +1,34 @@
 <script setup lang="ts">
 import dailyBanner from '@/page/home/typeDaily/daily/dailyBanner.vue'
 import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { EventBus, Events } from '@/envBus/envBus.ts';
 import { SessionStorage } from '@/constants/storage';
-
 import { useI18n } from 'vue-i18n'
 import { getBackgroundUrl } from '@/services/request';
+import { useCounterStore } from '@/storage/DocsView';
+import { watch } from 'vue';
 
+const store = useCounterStore();
 
-// TODO 当前视图渲染有问题，这里只要求存在文档类型id
+// 监听 store 中的 currentTypeName 变化，根据类型名称切换视图
+watch(() => store.getCurrentTypeName, (newTypeName) => {
+  console.log('Current Type Name:', newTypeName);
+  if (newTypeName) {
+    // 根据类型名称映射到相应的ComponentMapKey
+    // 这里需要根据实际业务逻辑进行映射
+    // 例如，如果newTypeName包含'daily'，则切换到dailyBase视图
+    let newView: ComponentMapKey = "dailyBase"; // 默认值
+    
+    if (newTypeName.toLowerCase().includes('plan_i')) {
+      newView = "Plan_I";
+    } else if (newTypeName.toLowerCase().includes('plan_ii')) {
+      newView = "Plan_II";
+    } else if (newTypeName.toLowerCase().includes('daily')) {
+      newView = "dailyBase";
+    }
+    
+    handleEditorToggle(newView);
+  }
+}, { immediate: true });
 
 // vue组件生命周期：组件挂载完成后执
 onMounted(() => {
@@ -16,21 +36,22 @@ onMounted(() => {
       const saved = sessionStorage.getItem(SessionStorage.VIEW_CURRENT)
       if (saved && saved in compMap) {
         // @ts-ignore
-        current.value = saved
+        current.value = saved as ComponentMapKey
+      } else {
+        // 如果没有保存的值，确保设置默认值并触发存储
+        current.value = "dailyBase";
+        sessionStorage.setItem(SessionStorage.VIEW_CURRENT, "dailyBase");
       }
     } catch {}
-    EventBus.$on(Events.Button_view,handleEditorToggle)
-
-
+    
     // 刷新背景图片
-    getBackgroundUrl()
-})
+    getBackgroundUrl();
+});
+
 // vue组件生命周期：在组件实例被卸载之前调用
 onBeforeUnmount(() => {
-    EventBus.$off(Events.Button_view,handleEditorToggle)
-
-})
-
+  
+});
 
 const handleEditorToggle = (nextState: ComponentMapKey) => {
   current.value = nextState
@@ -38,7 +59,6 @@ const handleEditorToggle = (nextState: ComponentMapKey) => {
     sessionStorage.setItem(SessionStorage.VIEW_CURRENT, String(current.value))
   } catch {}
 }
-
 
 type ComponentMapKey = 'dailyBase' | 'Plan_I' | 'Plan_II';
 

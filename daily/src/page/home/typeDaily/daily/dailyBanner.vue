@@ -1,34 +1,50 @@
 <script setup lang="ts">
-import { SessionStorage } from '@/constants/storage';
-import { EventBus, Events } from '@/envBus/envBus';
+
 import { addItemByType, GetItemsRequest, getMdByType, InsertItemRequest, ItemData } from '@/services/request';
 import { ref, watch, onMounted, onUnmounted, onBeforeMount, computed } from 'vue';
 import ItemViewAndEdit from './ItemViewAndEdit.vue';
 import { useI18n } from 'vue-i18n'
+import { useCounterStore } from '@/storage/DocsView'
 const { t, locale } = useI18n()
+
+const store = useCounterStore()
 
 
 
 // 文档id
-const docsId = ref<string>(String(sessionStorage.getItem(SessionStorage.VIEW_DOCS_ID) || ''))
+const docsId = ref<string>(store.getCurrentDocsId || '')
 // 文档内容
 const res = ref<ItemData[]>([])
 // 当前渲染的文档item
 const current=ref<ItemData>()
 
 onMounted(() => {
-  EventBus.$on(Events.Button_DocsId, dynamicDocsId)
+  // 设置初始docsId值
+  docsId.value = store.getCurrentDocsId || '';
   loadDocsId(docsId.value)
   
 })
 
+// 监听 store 中的 docsId 变化
+watch(() => store.getCurrentDocsId, (newDocsId) => {
+  if (newDocsId) {
+    dynamicDocsId(newDocsId)
+  }
+}, { immediate: true })
+
+// 监听刷新触发器    TODO 无效，子组件删除无法触发
+watch(() => store.getRefreshTrigger, () => {
+  if (docsId.value) {
+    loadDocsId(docsId.value);
+  }
+}, { immediate: false })
+
 onUnmounted(() => {
-  EventBus.$off(Events.Button_DocsId, dynamicDocsId)
   
 })
 
 /**
- *  和EventBus配合,动态更新docsId，
+ *  使用Pinia状态管理,动态更新docsId，
  */
 function dynamicDocsId(newDocsId: string) {
   docsId.value = newDocsId
@@ -51,12 +67,12 @@ async function loadDocsId(id:string){
     return 
   }
 
-  const typeId = sessionStorage.getItem(SessionStorage.VIEW_TYPE_ID) || '';
+  const typeId = store.getCurrentTypeId || '';
   const data: GetItemsRequest = { docsId: id, type: typeId };
   const result = await getMdByType(data);
   res.value = result;
 
-  const itemID:string=sessionStorage.getItem(SessionStorage.VIEW_ITEM_ID)|| '';
+  const itemID:string=store.getCurrentItemIndex|| '';
 
   current.value=result.find( it => it.index==itemID)
   if(!current.value){
@@ -71,16 +87,17 @@ async function loadDocsId(id:string){
  */
 function chooseItem(item:ItemData){
   current.value=item
-  sessionStorage.setItem(SessionStorage.VIEW_ITEM_ID,item.index)
+  store.setCurrentItemIndex(item.index)
 }
 
 async function InsertItem(){
   
-  const typeId = sessionStorage.getItem(SessionStorage.VIEW_TYPE_ID) || '';
+  const typeId = store.getCurrentTypeId || '';
   const data:InsertItemRequest={ docsId:docsId.value,type:typeId}
   const res=await addItemByType(data);
   if(res==true){
-     location.reload() 
+     // 重新加载文档列表而不是刷新整个页面
+     store.triggerRefresh();
   }else{
      alert("异常错误")
   }
