@@ -49,8 +49,8 @@ function save(){
 
 function deleteItem(item: ItemData) {
   deleteItemByTypes(item.index)
-  // 重新加载文档列表而不是刷新整个页面
-  // 触发刷新以重新加载列表
+
+  // 发送刷新事件，重新加载文档组件
   store.triggerRefresh();
 }
 

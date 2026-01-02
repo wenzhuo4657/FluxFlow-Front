@@ -8,16 +8,8 @@
  * 浏览器会话期间保持的数据，页面关闭后清除
  */
 export const SessionStorage = Object.freeze({
-  /** 当前选择的视图类型 (dailyBase, checklist, Plan_I, Plan_II) */
-  VIEW_CURRENT: 'view.current',
-
-  /** 当前选择的类型ID (number) */
-  VIEW_TYPE_ID: 'view.typeId',
-
-  /** 当前选择的文档ID (string) */
-  VIEW_DOCS_ID: 'view.docsId',
-  /**  当前选择的itemID（string） */
-  VIEW_ITEM_ID: 'view.itemId'
+  /** 主页视图状态 */
+  DOCS_VIEW_STATE: 'docsViewState',
 } as const);
 
 /**

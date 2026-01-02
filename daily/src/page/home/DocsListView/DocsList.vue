@@ -8,17 +8,13 @@ import { ArrowDown } from '@element-plus/icons-vue'
 import { SessionStorage } from '@/constants/storage'
 
 // 功能内容
-//  TODO 去除事件总线，改为无状态
 const items = ref<ContentData[]>([])
-const label = ref<string>('选择内容')
 const currentTypeId = ref<string>('')
 
 const store = useCounterStore()
 
 //处理文档id变更之后的行为
 function changedDocsID(target:ContentData){
-  label.value=target.name
-  sessionStorage.setItem(SessionStorage.VIEW_DOCS_ID,target.id)
   store.setCurrentDocsId(target.id)
 }
 
@@ -36,25 +32,6 @@ async function loadByTypeId(typeId: string) {
   try {
       const list:ContentData[] = await getTypesWithItems({ id: typeId })
       items.value = list
-
-      // 重置展示文案
-      label.value = '选择内容'
-      try {
-        const saved = String(sessionStorage.getItem(SessionStorage.VIEW_DOCS_ID) || '')
-        // 如果存在缓存，则恢复上次内容选择（如果兼容当前类型）
-        if (saved && saved !== 'null' && saved !== 'undefined') {
-          const target = items.value.find(it => it.id === saved)
-          if (target) {
-            changedDocsID(target)
-      
-          }
-        }else{
-          // 没有缓存，默认选择第一个元素
-          changedDocsID(items.value[0])
-        }
-      } catch {
-
-      }
  
   } catch (e) {
     console.error('Failed to load content names:', e)
@@ -82,7 +59,6 @@ watch(() => store.getCurrentTypeId, (newTypeId) => {
 
 // 接收type变更的函数
 function onTypeChanged(payload:  string) {
-  console.log(3)
   const typeId = typeof payload === 'string' ? payload : 'null'
 
   // 验证 typeId 是否有效

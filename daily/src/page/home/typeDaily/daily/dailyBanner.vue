@@ -32,7 +32,7 @@ watch(() => store.getCurrentDocsId, (newDocsId) => {
   }
 }, { immediate: true })
 
-// 监听刷新触发器    TODO 无效，子组件删除无法触发
+// 监听刷新触发器
 watch(() => store.getRefreshTrigger, () => {
   if (docsId.value) {
     loadDocsId(docsId.value);

@@ -1,15 +1,12 @@
 <script setup lang="ts">
 import Banner from '@/page/home/typeDaily/banner.vue'
 import { useI18n } from 'vue-i18n'
-import { onMounted } from 'vue'
 import StickyNote from './StickyNote/StickyNote.vue'
-import { SessionStorage } from '@/constants/storage'
-import { watch } from 'vue'
 import DocsList from './DocsListView/DocsList.vue'
 import Configuration from './Configuration/Configuration.vue'
-import Index from './index/index.vue'
 import { useCounterStore } from '@/storage/DocsView'
 import { HomeModels } from '@/storage/DocsView'
+import PreView from './PreView/PreView.vue'
 
 
 
@@ -28,7 +25,7 @@ const store = useCounterStore()
     
       <!-- 默认 -->
       <div  v-if="store.homeModel === HomeModels.DEFAULT">
-         <Index></Index>
+         <PreView></PreView>
       </div>
 
       <!-- 渲染文档列表 -->
@@ -40,12 +37,6 @@ const store = useCounterStore()
        <div  v-if="store.homeModel === HomeModels.DOC_CONTENT">
             <Banner></Banner>
        </div>
-
-       <!-- 渲染预览 -->
-        <div v-if="store.homeModel === HomeModels.PREVIEW">
-            渲染预览
-        </div>
-
        <!-- 渲染配置 -->
         <div v-if="store.homeModel === HomeModels.CONFIGURATION">
           <Configuration></Configuration>

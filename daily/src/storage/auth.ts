@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref, computed, Ref } from 'vue'
 import { LocalStorage } from '@/constants/storage'
+import { logout as apiLogout } from '@/services/login'
+import router from '@/router'
+import { useCounterStore } from '@/storage/DocsView'
 
 // 用户信息类型定义
 export interface UserInfo {
@@ -32,19 +35,30 @@ export const useAuthStore = defineStore('auth', () => {
   }
   
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      // 调用后端登出接口
+      await apiLogout()
+    } catch (error) {
+      console.error('Logout API call failed:', error)
+      // 即使后端调用失败，也要清理本地状态
+    }
+    
+    // 清理本地状态
     token.value = ''
     user.value = null
 
     localStorage.removeItem(LocalStorage.TOKEN)
     localStorage.removeItem(LocalStorage.USER_INFO)
-    // 可以在这里调用后端的登出接口
+    
+    // 清除 DocsView 状态
+    const docsViewStore = useCounterStore()
+    docsViewStore.clearState()
+
+    router.push('/')
   }
 
-  // 在应用启动时调用，用于恢复登录状态
-  const initializeAuth = () => {
-    // 状态已在 ref 初始化时从 localStorage 读取
-  }
+
 
   // 返回对外暴露的属性和方法
   return {
@@ -53,7 +67,6 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     setToken,
     setUser,
-    logout,
-    initializeAuth
+    logout
   }
 })
