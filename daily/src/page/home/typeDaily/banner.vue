@@ -6,17 +6,38 @@ import { useI18n } from 'vue-i18n'
 import { getBackgroundUrl } from '@/services/request';
 import { watch } from 'vue';
 import { useCounterStore } from '@/storage/DocsView';
+import Plan_I from './Plan_I/Plan_I.vue';
 
 
 const store = useCounterStore();
 
 // 定义索引值
-type ComponentMapKey = 'dailyBase';
+type ComponentMapKey = 'dailyBase' | 'Plan_I';
+
+// 类型保护函数：检查值是否为有效的 ComponentMapKey
+function isValidComponentKey(value: string): value is ComponentMapKey {
+  const validKeys: ComponentMapKey[] = ['dailyBase', 'Plan_I'];
+  return validKeys.includes(value as ComponentMapKey);
+}
+
+// 从字符串中提取有效的 ComponentMapKey
+function extractComponentKey(value: string): ComponentMapKey {
+  const validKeys: ComponentMapKey[] = ['dailyBase', 'Plan_I'];
+
+  for (const key of validKeys) {
+    if (value.includes(key)) {
+      return key;
+    }
+  }
+
+  throw new Error(`Invalid component key: "${value}". Expected one of: ${validKeys.join(', ')}`);
+}
 
 const current = ref<ComponentMapKey>("dailyBase"); // 控制显示哪个
 
 const compMap = {
   dailyBase: dailyBanner,
+  Plan_I: Plan_I
 } as const;
 
 const handleEditorToggle = (nextState: ComponentMapKey) => {
@@ -27,14 +48,13 @@ const handleEditorToggle = (nextState: ComponentMapKey) => {
 watch(() => store.currentView, (newTypeName) => {
   console.log('Current Type Name:', newTypeName);
   if (newTypeName) {
-    let newView: ComponentMapKey = "dailyBase"; // 默认值
-    
-    if (newTypeName.includes('dailyBase')) {
-      console.log('成功1024');
-      newView = "dailyBase";
+    try {
+      const newView = extractComponentKey(newTypeName);
+      handleEditorToggle(newView);
+    } catch (error) {
+      console.error(error);
+      // 使用默认值，或根据需要处理错误
     }
-    
-    handleEditorToggle(newView);
   }
 }, { immediate: true });
 

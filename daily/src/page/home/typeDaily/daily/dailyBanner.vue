@@ -69,8 +69,10 @@ async function loadDocsId(id:string){
 
   const typeId = store.getCurrentTypeId || '';
   const data: GetItemsRequest = { docsId: id, type: typeId };
+
   const result = await getMdByType(data);
-  res.value = result;
+  
+  res.value = result.sort((a, b) => a.title.localeCompare(b.title));
 
   const itemID:string=store.getCurrentItemIndex|| '';
 

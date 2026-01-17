@@ -18,6 +18,15 @@ export interface GetContentIdsByTypesRequest{
         id:string,
 }
 
+export interface AddDocsRequest {
+        typeId: string;
+        docsName: string;
+}
+
+export interface DeleteDocsRequest {
+        docsId: string;
+}
+
 
 export interface GetItemsRequest{
         docsId:string,
@@ -30,7 +39,13 @@ export interface InsertItemRequest{
         type:string,
 }
 
-    export interface UpdateCheckListRequest{
+export interface InsertItemWithFieldsRequest{
+        docsId:string,
+        type:string,
+        fields:Map<String,String>
+}
+
+export interface UpdateCheckListRequest{
         index:string,
         title:string
     }
@@ -100,6 +115,24 @@ export async function getMdByType(data: GetItemsRequest): Promise<ItemData[]> {
 export async function addItemByType(data: InsertItemRequest): Promise<boolean> {
   const http = getHttp();
   const res = await http.post<ApiResponse>("/api/item/insert", data, {
+    headers: {
+      "Content-Type": "application/json",
+    }
+  });
+
+ 
+
+   return res.data.code==200;
+}
+
+/**
+ * 新增日记条目(允许覆盖默认的属性)
+ * @param data 请求参数
+ * @returns 操作结果（严格检查响应状态）
+ */
+export async function addItemByTypeWithFields(data: InsertItemWithFieldsRequest): Promise<boolean> {
+  const http = getHttp();
+  const res = await http.post<ApiResponse>("/api/item/insertWithFields", data, {
     headers: {
       "Content-Type": "application/json",
     }
@@ -272,4 +305,36 @@ export async function getBackgroundUrl(): Promise<void> {
   }else{
     console.log("无背景图片")
   }
+}
+
+/**
+ * 添加文档
+ * @param data 请求参数（typeId: 类型ID, docsName: 文档名称）
+ * @returns 操作结果
+ */
+export async function addDocs(data: AddDocsRequest): Promise<boolean> {
+  const http = getHttp();
+  const res = await http.post<ApiResponse>("/api/types/addDocs", data, {
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    }
+  });
+  return res.data.data == true;
+}
+
+/**
+ * 删除文档
+ * @param data 请求参数（docsId: 文档ID）
+ * @returns 操作结果
+ */
+export async function deleteDocs(data: DeleteDocsRequest): Promise<boolean> {
+  const http = getHttp();
+  const res = await http.post<ApiResponse>("/api/types/deleteDocs", data, {
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    }
+  });
+  return res.data.data == true;
 }

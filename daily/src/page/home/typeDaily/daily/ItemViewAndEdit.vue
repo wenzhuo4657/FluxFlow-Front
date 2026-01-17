@@ -5,6 +5,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n'
 import MarkdownView from '../../components/content/markdownView.vue';
 import { useCounterStore } from '@/storage/DocsView'
+import { ElMessageBox } from 'element-plus';
 const { t, locale } = useI18n()
 
 const store = useCounterStore()
@@ -48,11 +49,31 @@ function save(){
 }
 
 function deleteItem(item: ItemData) {
+
+  
+  // 二次确认
+  try {
+    ElMessageBox.confirm(
+      '确定要删除该文档吗？删除后无法恢复。',
+      '删除确认',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    )
+  } catch {
+    // 用户取消
+    return
+  }
+
   deleteItemByTypes(item.index)
 
   // 发送刷新事件，重新加载文档组件
   store.triggerRefresh();
 }
+
+
 
 
 
@@ -68,13 +89,12 @@ function deleteItem(item: ItemData) {
         <div>
             <button  @click="editStatus">{{ $t('editItem') }}</button>
             <button  @click="save">{{ $t('saveItem') }}</button>
-            <button  @click="deleteItem(item)">{{ $t('deleteItem') }}</button>
+            <el-button   type="danger"  @click="deleteItem(item)">{{ $t('deleteItem') }}</el-button>
         </div>
       
         <!-- 编辑与预览区 -->
         <div>
                 <div v-if="!edit_val">
-        
               
                  <MarkdownView   v-model="item.content"></MarkdownView>
                     </div>

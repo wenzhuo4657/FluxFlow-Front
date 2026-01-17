@@ -6,10 +6,13 @@ import { HomeModels } from '@/storage/DocsView'
 
 import { ArrowDown } from '@element-plus/icons-vue'
 import { SessionStorage } from '@/constants/storage'
+import AddDocsButtonVue  from  '@/page/home/DocsListView/button/AddDocsButton.vue'
+import DeleteDocsButtonVue from '@/page/home/DocsListView/button/DeleteDocsButton.vue'
 
 // 功能内容
 const items = ref<ContentData[]>([])
 const currentTypeId = ref<string>('')
+const newDocsName = ref<string>('')
 
 const store = useCounterStore()
 
@@ -99,20 +102,48 @@ function onCommand(cmd: number | string) {
     store.setHomeModel(HomeModels.DOC_CONTENT)
   }
 }
+
+/** 操作成功后刷新列表并清空输入 */
+function handleSuccess() {
+  if (currentTypeId.value) {
+    loadByTypeId(currentTypeId.value)
+  }
+  newDocsName.value = ''
+}
 </script>
 
 <template>
 
       <el-scrollbar class="button-view">
             <div class="container">
-            <el-button
-            v-for="it in items"
-            :key="it.id"
-            class="item"
-            @click="onCommand(it.id)"
-          >
-            {{ it.name }}
-          </el-button>
+            <div v-for="it in items" :key="it.id" class="item-wrapper">
+ 
+                <el-button
+                class="item"
+                @click="onCommand(it.id)"
+              >
+                {{ it.name }}
+              </el-button>
+              <delete-docs-button-vue
+                :docs-id="it.id"
+                class="item_button"
+                @success="handleSuccess"
+              />
+            
+            </div>
+          </div>
+          <div class="add-section">
+            <el-input
+              v-model="newDocsName"
+              placeholder="新文档名称"
+              class="docs-name-input"
+              clearable
+            />
+            <add-docs-button-vue
+              :type-id="currentTypeId"
+              :docs-name="newDocsName"
+              @success="handleSuccess"
+            />
           </div>
   </el-scrollbar>
 
@@ -132,8 +163,27 @@ function onCommand(cmd: number | string) {
   padding: 10px;
 }
 
+.item-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+}
+
 .item {
   width: 80px;
   height: 120px;
+}
+
+
+.add-section {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  align-items: center;
+}
+
+.docs-name-input {
+  width: 150px;
 }
 </style>

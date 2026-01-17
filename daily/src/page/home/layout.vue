@@ -4,6 +4,7 @@ import SystemButtonBar from './components/button/SystemButtonBar/SystemButtonBar
 import Home from './Home.vue';
 import setup from './setup/setup.vue';
 import { computed } from 'vue';
+import setupIcon from '/images/setup.svg';
 
 
 const sidebarOpen= ref(false);//侧边栏显示/隐藏开关
@@ -42,7 +43,7 @@ function toggleSidebar(){
           <div >
             <img
             v-on:click="toggleSidebar"
-            src="/images/setup.svg"
+            :src="setupIcon"
             style="width: 2vw;height: 2vw; "
             alt="出错了">
           </div>
