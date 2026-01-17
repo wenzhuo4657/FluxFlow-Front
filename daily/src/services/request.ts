@@ -49,11 +49,17 @@ export interface UpdateCheckListRequest{
         index:string,
         title:string
     }
-    export interface UpdateItemRequest {
+export interface UpdateItemRequest {
   index: string;
   content: string;
 }
 
+export interface UpdateTaskRequest{
+  taskId:string,
+  taskStatus:string,
+  score:string
+
+}
 
 
 /**
@@ -331,6 +337,23 @@ export async function addDocs(data: AddDocsRequest): Promise<boolean> {
 export async function deleteDocs(data: DeleteDocsRequest): Promise<boolean> {
   const http = getHttp();
   const res = await http.post<ApiResponse>("/api/types/deleteDocs", data, {
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    }
+  });
+  return res.data.data == true;
+}
+
+
+/**
+ * 完成plan
+ * @param data 
+ * @returns 
+ */
+export async function updateTaskRequest(data: UpdateTaskRequest): Promise<boolean> {
+  const http = getHttp();
+  const res = await http.post<ApiResponse>("/api/item/task/update", data, {
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",

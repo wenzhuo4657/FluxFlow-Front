@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import CreatePlanForm from './CreatePlanForm.vue';
+import ItemViewAndEdit from './ItemViewAndEdit.vue';
 </script>
 
 <template>
   <div class="plan-container">
     <!-- 左侧：创建计划表单 -->
     <div class="form-wrapper">
-      <CreatePlanForm @success="handleCreateSuccess" />
+      <CreatePlanForm />
     </div>
 
     <!-- 右侧：计划列表（由你实现） -->
     <div class="content-wrapper">
-      <p>计划列表区域 - 请在此处实现你的列表展示逻辑</p>
+      <ItemViewAndEdit></ItemViewAndEdit>
     </div>
   </div>
 </template>
