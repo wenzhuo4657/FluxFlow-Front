@@ -1,9 +1,33 @@
-import axios, { AxiosInstance, AxiosRequestHeaders } from 'axios';
+import axios, { AxiosInstance, AxiosRequestHeaders, InternalAxiosRequestConfig } from 'axios';
 import { LocalStorage } from '@/constants/storage';
 import router from '@/router/index';
 import { useAuthStore } from '@/storage/auth';
+import { refeshToken } from '@/services/request';
 
 let service: AxiosInstance | null = null;
+
+// Token 刷新状态管理
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value?: any) => void;
+  reject: (reason?: any) => void;
+}> = [];
+
+/**
+ * 处理等待刷新 token 的队列
+ */
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
+
 
 // 错误消息缓存和防重复机制
 const errorCache = new Map<string, number>();
@@ -53,40 +77,33 @@ export function initHttp(): AxiosInstance {
     baseURL: import.meta.env.VITE_API_BASE || '',
   });
 
+  // 请求拦截器
   service.interceptors.request.use(
     (config) => {
+    
       // 确保 headers 存在
       if (!config.headers) {
         config.headers = {} as AxiosRequestHeaders;
       }
 
-      // 获取 token
+      // 获取 access_token
       const auth = useAuthStore();
-      let token = '';
+      let accessToken = '';
 
-      if (auth.token) {
-        token = (auth.token as any).value || auth.token;
+      if (auth.accessToken) {
+        accessToken = (auth.accessToken as any).value || auth.accessToken;
       }
 
-      // 备用方案：从 localStorage 直接获取
-      if (!token) {
-        token = localStorage.getItem(LocalStorage.TOKEN) || '';
-      }
+  
 
-      // 调试日志
-      console.log('HTTP Request Token Check:', {
-        tokenValue: token,
-        hasToken: !!token
-      });
-
-      // 动态设置 satoken 认证头
-      if (token) {
-        const authHeader = `Bearer ${token}`;
-        console.log('Setting satoken header:', authHeader);
-        (config.headers as AxiosRequestHeaders)['satoken'] = authHeader;
+      // 动态设置 accessToken 认证头
+    
+      if (accessToken) {
+        const authHeader = `Bearer ${accessToken}`;
+        (config.headers as AxiosRequestHeaders)['ACCESS_TOKEN'] = authHeader;
       } else {
         console.log('No token found, satoken header not set');
-        delete (config.headers as AxiosRequestHeaders)['satoken'];
+        delete (config.headers as AxiosRequestHeaders)['ACCESS_TOKEN'];
       }
 
       return config;
@@ -120,7 +137,66 @@ export function initHttp(): AxiosInstance {
             router.push('/login')
             console.log('Token无效，清除登录状态');
           }
+          if(code==410){
+            const auth = useAuthStore();
+            const originalRequest = response.config as InternalAxiosRequestConfig & { _retry?: boolean };
+
+            // 如果已经在重试，直接跳转登录页
+            if (originalRequest._retry) {
+              auth.logout();
+              localStorage.removeItem(LocalStorage.TOKEN);
+              router.push('/login');
+              return Promise.reject(new Error('Token 刷新失败，请重新登录'));
+            }
+
+            // 如果正在刷新 token，将请求加入队列
+            if (isRefreshing) {
+              return new Promise((resolve, reject) => {
+                failedQueue.push({ resolve, reject });
+              })
+                .then((token) => {
+                  if (originalRequest.headers) {
+                    (originalRequest.headers as AxiosRequestHeaders)['ACCESS_TOKEN'] = `Bearer ${token}`;
+                  }
+                  return service!(originalRequest);
+                })
+                .catch((err) => {
+                  return Promise.reject(err);
+                });
+            }
+
+            // 开始刷新 token
+            isRefreshing = true;
+
+            return refeshToken()
+              .then((newAccessToken) => {
+                // 更新 store 中的 accessToken
+                auth.setAccessToken(newAccessToken);
+
+                // 处理队列中的请求
+                processQueue(null, newAccessToken);
+
+                // 更新请求头并重放当前请求
+                if (originalRequest.headers) {
+                  (originalRequest.headers as AxiosRequestHeaders)['ACCESS_TOKEN'] = `Bearer ${newAccessToken}`;
+                }
+                return service!(originalRequest);
+              })
+              .catch((err) => {
+                // 刷新失败，处理队列中的请求
+                processQueue(err, null);
+                auth.logout();
+                localStorage.removeItem(LocalStorage.TOKEN);
+                router.push('/login');
+                return Promise.reject(err);
+              })
+              .finally(() => {
+                isRefreshing = false;
+              });
+          }
+           
         }
+      
       }
 
       return response;
@@ -128,8 +204,12 @@ export function initHttp(): AxiosInstance {
     (error) => {
       // 处理 HTTP 状态码错误
       if (error.response) {
+     
         const status = error.response.status;
+        
         const message = error.response.data?.message || error.message || '网络请求失败';
+        const code=error.response.data.code|| '';
+
 
         // 根据 HTTP 状态码显示错误
         if (status >= 400 && status < 600) {
@@ -149,6 +229,69 @@ export function initHttp(): AxiosInstance {
               window.location.href = '/login';
             });
           }
+
+  
+           if(code==410){
+            const auth = useAuthStore();
+            const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+
+            // 如果已经在重试，直接跳转登录页
+            if (originalRequest?._retry) {
+              auth.logout();
+              localStorage.removeItem(LocalStorage.TOKEN);
+              router.push('/login');
+              return Promise.reject(new Error('Token 刷新失败，请重新登录'));
+            }
+
+            // 如果正在刷新 token，将请求加入队列
+            if (isRefreshing) {
+              return new Promise((resolve, reject) => {
+                failedQueue.push({ resolve, reject });
+              })
+                .then((token) => {
+                  if (originalRequest?.headers) {
+                    (originalRequest.headers as AxiosRequestHeaders)['ACCESS_TOKEN'] = `Bearer ${token}`;
+                  }
+                  return getHttp()(originalRequest);
+                })
+                .catch((err) => {
+                  return Promise.reject(err);
+                });
+            }
+
+            // 开始刷新 token
+            isRefreshing = true;
+
+            return refeshToken()
+              .then((newAccessToken) => {
+                console.log("刷新成功")
+                // 更新 store 中的 accessToken
+                auth.setAccessToken(newAccessToken);
+
+                // 处理队列中的请求
+                processQueue(null, newAccessToken);
+
+                // 更新请求头并重放当前请求
+                if (originalRequest?.headers) {
+                  (originalRequest.headers as AxiosRequestHeaders)['ACCESS_TOKEN'] = `Bearer ${newAccessToken}`;
+                }
+                return getHttp()(originalRequest);
+              })
+              .catch((err) => {
+                // 刷新失败，处理队列中的请求
+                processQueue(err, null);
+                auth.logout();
+                localStorage.removeItem(LocalStorage.TOKEN);
+                router.push('/login');
+                return Promise.reject(err);
+              })
+              .finally(() => {
+                isRefreshing = false;
+              });
+          }
+        
+
+      
         }
       } else if (error.request) {
         // 网络错误

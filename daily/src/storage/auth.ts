@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed, Ref } from 'vue'
-import { LocalStorage } from '@/constants/storage'
+import { LocalStorage, SessionStorage } from '@/constants/storage'
 import { logout as apiLogout } from '@/services/login'
 import router from '@/router'
 import { useCounterStore } from '@/storage/DocsView'
@@ -18,6 +18,7 @@ export interface UserInfo {
 export const useAuthStore = defineStore('auth', () => {
   // State
   const token: Ref<string> = ref(localStorage.getItem(LocalStorage.TOKEN) || '')
+  const accessToken:Ref<String>=ref(sessionStorage.getItem(SessionStorage.ACCESS_TOKEN)||'')
   const user: Ref<UserInfo | null> = ref(JSON.parse(localStorage.getItem(LocalStorage.USER_INFO) || 'null'))
 
   // Getters
@@ -27,6 +28,11 @@ export const useAuthStore = defineStore('auth', () => {
   const setToken = (newToken: string) => {
     token.value = newToken
     localStorage.setItem(LocalStorage.TOKEN, newToken)
+  }
+  const setAccessToken=(newAccessToken: string)=> {
+    accessToken.value=newAccessToken
+    sessionStorage.setItem(SessionStorage.ACCESS_TOKEN,newAccessToken)
+    
   }
 
   const setUser = (userInfo: UserInfo | null) => {
@@ -63,10 +69,12 @@ export const useAuthStore = defineStore('auth', () => {
   // 返回对外暴露的属性和方法
   return {
     token,
+    accessToken,
     user,
     isAuthenticated,
     setToken,
     setUser,
+    setAccessToken,
     logout
   }
 })

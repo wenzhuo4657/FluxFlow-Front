@@ -10,6 +10,7 @@
 export const SessionStorage = Object.freeze({
   /** 主页视图状态 */
   DOCS_VIEW_STATE: 'docsViewState',
+  ACCESS_TOKEN: 'AccessToken'
 } as const);
 
 /**

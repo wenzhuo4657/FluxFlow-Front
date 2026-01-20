@@ -1,4 +1,5 @@
 import { getHttp } from "@/lib/http";
+import { useAuthStore } from "@/storage/auth";
 
 
 
@@ -360,4 +361,30 @@ export async function updateTaskRequest(data: UpdateTaskRequest): Promise<boolea
     }
   });
   return res.data.data == true;
+}
+
+
+/**
+ * refesh token
+ * @returns 新的 accessToken
+ */
+export async function refeshToken(): Promise<string> {
+  const http = getHttp();
+  const auth = useAuthStore();
+
+  const token = auth.token;
+
+
+  const res = await http.post<ApiResponse<string>>("/api/oauth/refresh", {}, {
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "satoken": `Bearer ${token}`
+    }
+  });
+
+  if(res.data.code == 200){
+    return res.data.data;
+  }
+  throw new Error('Token refresh failed');
 }

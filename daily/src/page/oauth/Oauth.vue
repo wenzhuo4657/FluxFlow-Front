@@ -10,13 +10,15 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 onMounted(() => {
-  const { token, userInfo } = route.query
+  const {  token,accessToken, userInfo } = route.query
 
-  if (token && userInfo) {
+  if ( token && userInfo) {
     try {
+  
   
       // 保存 token 和用户信息
       authStore.setToken(token)
+      authStore.setAccessToken(accessToken)
       authStore.setUser(JSON.parse(decodeURIComponent(userInfo)))
 
       // 登录成功，跳转到主页
