@@ -1,4 +1,4 @@
-import { getHttp } from "@/lib/http";
+import { getHttp } from "@/lib/axios";
 
 export async function github(){
   const http = getHttp()

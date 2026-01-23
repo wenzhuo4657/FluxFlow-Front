@@ -5,8 +5,8 @@ import 'element-plus/dist/index.css'
 import { i18n } from './i18n'
 import router from './router'
 import { createPinia } from 'pinia'
-import { initHttp } from './lib/http'
 import { useAuthStore } from './storage/auth'
+import { initHttp } from './lib/axios'
 const app = createApp(App)
 
 app
@@ -16,8 +16,6 @@ app
   .use(i18n)
 
 const userStore = useAuthStore(); 
-
-
-initHttp(userStore);
+initHttp();
 
 app.mount('#app')

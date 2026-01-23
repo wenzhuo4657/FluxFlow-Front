@@ -4,6 +4,21 @@ import { Document, FolderOpened, List, Lightning } from '@element-plus/icons-vue
 
 const { t } = useI18n()
 </script>
+<!-- 
+1,编写目标定义： 文档  
+暂不处理问题： 当前没有处理名称冲突，允许重复
+2，预览
+（1）基本文档： 无脑展示所有文档当中的今日，如果存在的话
+（2）plan： 展示还在有效期的任务，根据任务结束时间由近及远
+
+
+对应接口
+
+0，获得基本文档的id和name
+1，编写今日内容，支持解析#文档名
+入参： docsid
+内部自动判断有没有今日的，没有添加，有就追加
+-->
 
 <template>
   <div class="preview-container">

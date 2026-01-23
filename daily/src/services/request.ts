@@ -1,5 +1,6 @@
-import { getHttp } from "@/lib/http";
+import { getHttp } from "@/lib/axios";
 import { useAuthStore } from "@/storage/auth";
+import axios from "axios";
 
 
 
@@ -362,19 +363,35 @@ export async function updateTaskRequest(data: UpdateTaskRequest): Promise<boolea
   });
   return res.data.data == true;
 }
+/**
+ * 穿件plan关联文档
+ * 
+ */
 
+export async function connectionBase(taskId:string) {
+  const http = getHttp();
+  const res = await http.post<ApiResponse>("/api/item/task/connectionBase?taskId="+taskId,  {
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    }
+  });
+  return res.data.data == true;
+  
+}
 
 /**
  * refesh token
  * @returns 新的 accessToken
  */
 export async function refeshToken(): Promise<string> {
-  const http = getHttp();
+
+  // 这里创建新的实例，是为了避免陷入无限拦截当中
+  const http =axios.create({
+    baseURL: import.meta.env.VITE_API_BASE || '',
+  });
   const auth = useAuthStore();
-
   const token = auth.token;
-
-
   const res = await http.post<ApiResponse<string>>("/api/oauth/refresh", {}, {
     headers: {
       "Content-Type": "application/json",

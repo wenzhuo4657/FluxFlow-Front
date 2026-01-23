@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { GetItemsRequest, getMdByType, ItemData, updateItemByType, UpdateItemRequest, updateTaskRequest as updateTaskApi, UpdateTaskRequest } from '@/services/request';
+import { connectionBase, GetItemsRequest, getMdByType, ItemData, updateItemByType, UpdateItemRequest, updateTaskRequest as updateTaskApi, UpdateTaskRequest } from '@/services/request';
 import { useCounterStore } from '@/storage/DocsView';
 import { ref, watch, computed, onMounted } from 'vue';
 import MarkdownView from '@/page/home/components/content/markdownView.vue';
@@ -24,6 +24,7 @@ interface Plan {
   score: string | null;
   parent_id: string | null;
   content: string;
+  connection:string|null;
 }
 
 const store = useCounterStore();
@@ -87,6 +88,8 @@ function parseExpand(expand: string): Partial<Plan> {
       case 'parent_id':
         fields.parent_id = value === 'null' ? null : value;
         break;
+      case 'connection':
+        fields.connection= value== 'null'?null :value
     }
   }
 
@@ -107,7 +110,8 @@ function convertToPlan(item: ItemData): Plan {
     task_status: parsed.task_status || TaskStatus.TODO,
     score: parsed.score || null,
     parent_id: parsed.parent_id || null,
-    content: item.content || ''
+    content: item.content || '',
+    connection:parsed.connection||''
   };
 }
 
@@ -269,6 +273,24 @@ async function saveEdit(plan: Plan) {
     alert('保存失败');
   }
 }
+
+
+/**
+ * 跳转到目标文档
+ */
+function route(docsId:string){
+  store.setCurrentTypeId("0")
+  store.setCurrentDocsId(docsId)
+  store.setCurrentView('dailyBase')
+}
+
+/**
+ * 关联基本文档
+ */
+function connection(taskId:string){
+  connectionBase(taskId)
+}
+
 </script>
 
 <template>
@@ -326,10 +348,15 @@ async function saveEdit(plan: Plan) {
       </div>
     </div>
 
-    <!-- 完成按钮（非编辑模式显示） -->
+    <!--  按钮 -->
     <button v-if="tasklist==TaskStatus.TODO&&editingPlanId !== plan.task_ID" @click="completeTask(plan,TaskStatus.COMPLETED)">✓ 完成</button>
     <button v-if="tasklist==TaskStatus.COMPLETED&&editingPlanId !== plan.task_ID" @click="completeTask(plan,TaskStatus.DESTROYED)">✓ 销毁</button>
+    <button v-if="plan.connection==''"  @click="connection(plan.task_ID)">创建关联文档</button>
+    <button  v-if="plan.connection!=null&&plan.connection!=''"  @click="route(plan.connection)">执行状况</button>
   </div>
+
+
+
 </template>
 
 <style scoped>
