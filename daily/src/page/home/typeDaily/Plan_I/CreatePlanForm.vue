@@ -31,7 +31,7 @@ interface PlanFields {
   data_start: string;
   data_end: string;
   task_status: TaskStatus;
-  parent_id: string;
+  // parent_id: string;
 }
 
 const formData = ref<PlanFields>({
@@ -39,7 +39,7 @@ const formData = ref<PlanFields>({
   data_start: '',
   data_end: '',
   task_status: TaskStatus.TODO,  // 默认待做
-  parent_id: ''
+  // parent_id: ''
 });
 
 // 定义事件
@@ -78,9 +78,9 @@ async function insertItemWithFields() {
   if (formData.value.task_status) {
     fieldsObj.task_status = formData.value.task_status;
   }
-  if (formData.value.parent_id) {
-    fieldsObj.parent_id = formData.value.parent_id;
-  }
+  // if (formData.value.parent_id) {
+  //   fieldsObj.parent_id = formData.value.parent_id;
+  // }
 
   const data: InsertItemWithFieldsRequest = {
     docsId: docsId,
@@ -114,7 +114,7 @@ function resetForm() {
     data_start: '',
     data_end: '',
     task_status: TaskStatus.TODO,
-    parent_id: ''
+    // parent_id: ''
   };
 }
 </script>
@@ -169,7 +169,7 @@ function resetForm() {
     </div>
 
     <!-- 父任务ID（可选，用于建立父子关系） -->
-    <div class="form-group">
+    <!-- <div class="form-group">
       <label>父任务ID (parent_id)</label>
       <input
         v-model="formData.parent_id"
@@ -178,7 +178,7 @@ function resetForm() {
         class="form-input"
       />
       <small class="field-hint">用于建立任务间的父子关系</small>
-    </div>
+    </div> -->
 
     <button @click="insertItemWithFields" class="btn-submit">
       创建计划

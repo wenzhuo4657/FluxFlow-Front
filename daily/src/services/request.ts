@@ -75,6 +75,11 @@ export interface ItemData {
   expand: string;
 }
 
+export interface TodayRes{
+  baseItem:ItemData[];
+  planItem:ItemData[];
+}
+
 /**
  * 类型数据
  * 根据API文档，id为String类型以避免精度损失
@@ -112,6 +117,22 @@ export async function getMdByType(data: GetItemsRequest): Promise<ItemData[]> {
 
   // 严格返回数据：确保返回数组类型
   return Array.isArray(res.data.data) ? res.data.data : [];
+}
+
+/**
+ * 查询全局的今日文档
+ * 
+ */
+export async function today(): Promise<TodayRes>  {
+  const http = getHttp();
+  const res = await http.get<ApiResponse>("/api/item/today",  {
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    }
+  });
+  return res.data.data
+  
 }
 
 
@@ -405,3 +426,5 @@ export async function refeshToken(): Promise<string> {
   }
   throw new Error('Token refresh failed');
 }
+
+
