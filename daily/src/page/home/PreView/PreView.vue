@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ItemData, today, TodayRes, ContentData, getTypesWithItems } from '@/services/request';
+import { ItemData, today, TodayRes, TodayItem, ContentData, getTypesWithItems, TailAddRequest, tailAdd } from '@/services/request';
 import { computed, onMounted, ref, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n'
 
@@ -31,7 +31,7 @@ async function loadDocuments() {
 }
 
 // ==================== 数据加载相关 ====================
-const base = ref<ItemData[]>([])
+const base = ref<TodayItem[]>([])
 const plans = ref<Plan[]>([])
 
 /**
@@ -117,9 +117,9 @@ async function loadData() {
     const usedIds = new Set<string>();
     plans.value = mappedPlans.map(plan => {
       if (typeof plan.connection === 'string') {
-        const linkedItem = base.value.find(item => item.index === plan.connection);
+        const linkedItem = base.value.find(item => item.docsId === plan.connection);
         if (linkedItem) {
-          usedIds.add(linkedItem.index)
+          usedIds.add(linkedItem.docsId)
           plan.connection = linkedItem || plan.connection
         }
       }
@@ -127,7 +127,7 @@ async function loadData() {
     });
 
     // 3. 过滤掉已被关联的 base 条目
-    base.value = base.value.filter(item => !usedIds.has(item.index));
+    base.value = base.value.filter(item => !usedIds.has(item.docsId));
 
   } catch (error) {
     console.error("Failed to load today's data:", error);
@@ -356,26 +356,34 @@ const handleInput = () => {
 
 /**
  * 选择文档并添加到关联列表（限制一次只能选择一个文档）
+ * 选择完成后删除输入框中的 #文档名称
  * @param doc - 选中的文档对象
  */
 const selectDoc = (doc: ContentData) => {
+  const textarea = getTextareaElement()
+  if (textarea) {
+    const { word, index } = getCurrentWord()
+    const cursorPos = textarea.selectionStart
+
+    // 删除从 # 开始到光标位置的文本
+    content.value = content.value.slice(0, index) + content.value.slice(cursorPos)
+
+    // 设置光标位置到删除后的位置
+    nextTick(() => {
+      textarea.selectionStart = textarea.selectionEnd = index
+      textarea.focus()
+    })
+  }
+
   // 替换已选择的文档（单选模式）
   selectedDocIds.value = [doc.id]
 
-  // 重置选择索引，保持 isSelectingTag 为 true 以支持连续选择
+  // 重置选择索引
   selectedIndex.value = 0
 
-  // 关闭弹窗（因为单选模式下选择后不需要再选）
+  // 关闭弹窗
   showSuggestions.value = false
   exitTagSelection()
-
-  // 聚焦输入框，保持 # 符号以便继续输入过滤
-  nextTick(() => {
-    const textarea = getTextareaElement()
-    if (textarea) {
-      textarea.focus()
-    }
-  })
 }
 
 /**
@@ -391,14 +399,28 @@ const removeDoc = (docId: string) => {
 
 /**
  * 保存内容
+ * 顺序执行：先保存 -> 再加载数据 -> 最后加载文档列表
  */
-const handleSave = () => {
-  console.log('保存内容:', content.value)
-  console.log('关联文档 ID:', selectedDocIds.value)
-  console.log('完整数据:', {
-    content: content.value,
-    selectedDocIds: selectedDocIds.value
-  })
+const handleSave = async () => {
+  try {
+    const data: TailAddRequest = {
+      content: content.value,
+      docsId: selectedDocIds.value[0]
+    }
+    console.log('保存内容:', content.value)
+    console.log('关联文档 ID:', selectedDocIds.value)
+
+    // 顺序执行三个异步操作
+    await tailAdd(data)
+    await loadData()
+    await loadDocuments()
+
+    // 清空输入框
+    content.value = ''
+    selectedDocIds.value = []
+  } catch (error) {
+    console.error('保存失败:', error)
+  }
 }
 
 /**
@@ -505,13 +527,13 @@ const formatDate = (dateStr: string): string => {
         <div class="preview-grid">
           <el-card
             v-for="item in base"
-            :key="item.index"
+            :key="item.docsId"
             class="preview-card base-card"
             shadow="hover"
           >
             <template #header>
               <div class="card-header">
-                <span class="card-title">{{ item.title || '无标题' }}</span>
+                <span class="card-title">{{ item.name || '无标题' }}</span>
               </div>
             </template>
             <div class="card-content">

@@ -1,12 +1,12 @@
 <script setup lang="ts">
     import { onMounted, ref, watch, onUnmounted } from 'vue'
     import NoteWindow from '@/page/home/components/content/window.vue'
-import { ContentData, ItemData, getMdByType, getTypesWithItems, addItemByType, updateItemByType } from '@/services/request'
+import { ContentData, ItemData, getMdByType, getTypesWithItems, addItemByType, updateItemByType, addDocs, AddDocsRequest } from '@/services/request'
 import { GetItemsRequest } from '@/services/request'
 import { GetContentIdsByTypesRequest, InsertItemRequest, UpdateItemRequest } from '@/services/request'
     // 便签窗口状态
 const showNoteWindow = ref(true)
-const type = ref<string>('3')
+const type = ref<string>('2')
 const noteContent = ref(`你好`)
 
 
@@ -80,11 +80,14 @@ onMounted(async () => {
   try {
     // 1. 获取docsId
     const data: GetContentIdsByTypesRequest = { id: type.value }
-    const res: ContentData[] = await getTypesWithItems(data)
+    var res: ContentData[] = await getTypesWithItems(data)
 
     if (!res || res.length === 0) {
       console.warn('未找到对应的文档类型')
-      return
+      const data1:AddDocsRequest={typeId:type.value,docsName:'便签'}
+      await addDocs(data1)
+      res= await getTypesWithItems(data)
+
     }
 
     const docsId = res[0].id

@@ -34,9 +34,20 @@ interface PlanFields {
   // parent_id: string;
 }
 
+/**
+ * 获取今天的日期，格式为 YYYY-MM-DD
+ */
+function getTodayDate(): string {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 const formData = ref<PlanFields>({
   title: '',
-  data_start: '',
+  data_start: getTodayDate(),
   data_end: '',
   task_status: TaskStatus.TODO,  // 默认待做
   // parent_id: ''
@@ -111,7 +122,7 @@ async function insertItemWithFields() {
 function resetForm() {
   formData.value = {
     title: '',
-    data_start: '',
+    data_start: getTodayDate(),
     data_end: '',
     task_status: TaskStatus.TODO,
     // parent_id: ''

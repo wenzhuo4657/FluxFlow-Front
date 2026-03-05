@@ -24,6 +24,10 @@ export interface AddDocsRequest {
         typeId: string;
         docsName: string;
 }
+export interface  TailAddRequest {
+        docsId:string;
+        content:string;
+}
 
 export interface DeleteDocsRequest {
         docsId: string;
@@ -75,8 +79,19 @@ export interface ItemData {
   expand: string;
 }
 
+/**
+ * 今日item，特殊类型，
+ */
+export interface TodayItem{
+  docsId:string;
+  index: string;
+  content: string;
+  name: string;
+
+}
+
 export interface TodayRes{
-  baseItem:ItemData[];
+  baseItem:TodayItem[];
   planItem:ItemData[];
 }
 
@@ -427,4 +442,35 @@ export async function refeshToken(): Promise<string> {
   throw new Error('Token refresh failed');
 }
 
+
+/**
+ * 心跳接口
+ */
+
+export async function heartbeat() {
+    const http = getHttp();
+    await http.post<ApiResponse>("/api/oauth/heartbeat",  {
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    }
+  });
+}
+
+
+/**
+ * 追加日志
+ */
+
+export async function tailAdd(data:TailAddRequest) {
+  const http = getHttp();
+  const res = await http.post<ApiResponse>("/api/item/tailadd", data, {
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    }
+  });
+  return res.data.data == true;
+  
+}
 

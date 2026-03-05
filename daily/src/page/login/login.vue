@@ -13,7 +13,7 @@
 
 const loginWithGithub = () => {
 
-  const url=import.meta.env.VITE_API_BASE+'/api/oauth/render/github';
+  const url = (import.meta.env.VITE_API_BASE || '') + '/api/oauth/render/github';
   console.log(url)
   window.location.href = url
 }

@@ -61,7 +61,7 @@ export function initHttp(): AxiosInstance {
 
       if (accessToken) {
         const authHeader = `Bearer ${accessToken}`;
-        (config.headers as AxiosRequestHeaders)['ACCESS_TOKEN'] = authHeader;
+        (config.headers as AxiosRequestHeaders)['ACCESS-TOKEN'] = authHeader;
       }
       return config;
     }
@@ -146,7 +146,7 @@ export function initHttp(): AxiosInstance {
                       
                        // 更新请求头并重放当前请求
                         if (originalRequest.headers) {
-                             (originalRequest.headers as AxiosRequestHeaders)['ACCESS_TOKEN'] = `Bearer ${newAccessToken}`;
+                             (originalRequest.headers as AxiosRequestHeaders)['ACCESS-TOKEN'] = `Bearer ${newAccessToken}`;
                         }
                         return service!(originalRequest);
                       })
